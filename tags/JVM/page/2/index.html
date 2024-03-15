@@ -1,0 +1,18 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible"><meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1,user-scalable=no"><meta name="renderer" content="webkit"><meta name="color-scheme" content="dark light"><meta name="author" content="hcj"><meta name="description" content=""><meta name="keywords" content=""><title>ArcLength</title><link rel="icon" type="image/x-icon" href="/images/favicon.ico"><link rel="stylesheet" href="//at.alicdn.com/t/font_3242539_utq6ykfq7z.css"><link rel="stylesheet" light-src="https://cdn.staticfile.org/highlight.js/11.5.0/styles/github.min.css" dark-src="https://cdn.staticfile.org/highlight.js/11.5.0/styles/github-dark.min.css"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Serif" as="font"><link href="/style/index.css" rel="stylesheet"><meta name="generator" content="Hexo 7.1.1"><link rel="alternate" href="/atom.xml" title="ArcLength" type="application/atom+xml">
+</head><body><header class="page-header"><nav><ul class="router-list"><li class="nav-item"> <a href="/">主页</a></li><li class="nav-item"> <a href="/archives/">归档</a></li><li class="nav-item"> <a href="/atom.xml">RSS</a></li></ul><div class="mode-switch"><span class="iconfont icon-DarkTheme"></span></div></nav><ul class="social-list"><li class="social-item"><a target="_blank" rel="noopener" href="https://t.me/hcjtn"><span class="iconfont icon-telegram"></span></a></li><li class="social-item"><a target="_blank" rel="noopener" href="https://github.com/hcjtn"><span class="iconfont icon-github"></span></a></li><li class="social-item"><a href="mailto:hu1466643375@qq.com"><span class="iconfont icon-mail"></span></a></li></ul></header><main><section class="main-content"><div class="tag-list"><h2>#JVM</h2><ul class="article-list"><li class="article-list-item"><div><a class="article-title" href="/2023/03/16/3.JVM%E7%B3%BB%E5%88%97-%E8%BF%90%E8%A1%8C%E6%97%B6%E6%95%B0%E6%8D%AE%E5%8C%BA/" title="3.JVM系列-运行时数据区">3.JVM系列-运行时数据区</a></div><div class="article-preview">
+此章把运行时数据区里比较少的地方讲一下。虚拟机栈，堆，方法区这些地方后续再讲。
+
+pc寄存器 没有垃圾回收器 没有oom
+本地方法栈 有oom 没有垃圾回收器 不受jvm管理
+运行时数据区概述...</div><div class="article-time">2023-03-16</div></li><li class="article-list-item"><div><a class="article-title" href="/2023/03/14/2.JVM%E7%B3%BB%E5%88%97-%E7%B1%BB%E5%8A%A0%E8%BD%BD%E5%AD%90%E7%B3%BB%E7%BB%9F/" title="2.JVM系列-类加载子系统">2.JVM系列-类加载子系统</a></div><div class="article-preview">第2章-类加载子系统内存结构概述简图
+
+详细图英文版
+
+
+
+
+中文版
+
+
+注意：方法区只有HotSpot虚拟机有，J9，JRockit都没有
+如果自己想手写一个Java虚拟机的话，主要考虑哪些结...</div><div class="article-time">2023-03-14</div></li><li class="article-list-item"><div><a class="article-title" href="/2023/03/12/1.JVM%E7%B3%BB%E5%88%97-JVM%E4%B8%8EJava%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/" title="1.JVM系列-JVM与Java体系结构">1.JVM系列-JVM与Java体系结构</a></div><div class="article-preview">以前我是堆，你是栈你总是能精准的找到我，给我指明出路后来有一天我明白了我变成了栈，你却隐身堆海我却找不到你了，空指针了我不愿意如此，在下一轮full gc前我找到了object家的finaliz...</div><div class="article-time">2023-03-12</div></li></ul></div></section></main><footer class="footer-page"><div><span>Powered by</span><a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a><span>| Theme</span><a target="_blank" rel="noopener" href="https://github.com/techmovie/hexo-theme-instapaper">instapaper</a></div></footer><script src="/scripts/dark.js"></script></body></html>

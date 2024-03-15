@@ -1,0 +1,1103 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible"><meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1,user-scalable=no"><meta name="renderer" content="webkit"><meta name="color-scheme" content="dark light"><meta name="author" content="hcj"><meta name="description" content=""><meta name="keywords" content=""><title>Docker-高阶</title><link rel="icon" type="image/x-icon" href="/images/favicon.ico"><link rel="stylesheet" href="//at.alicdn.com/t/font_3242539_utq6ykfq7z.css"><link rel="stylesheet" light-src="https://cdn.staticfile.org/highlight.js/11.5.0/styles/github.min.css" dark-src="https://cdn.staticfile.org/highlight.js/11.5.0/styles/github-dark.min.css"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Serif" as="font"><link href="/style/index.css" rel="stylesheet"><meta name="generator" content="Hexo 7.1.1"><link rel="alternate" href="/atom.xml" title="ArcLength" type="application/atom+xml">
+</head><body><header class="page-header"><nav><ul class="router-list"><li class="nav-item"> <a href="/">主页</a></li><li class="nav-item"> <a href="/archives/">归档</a></li><li class="nav-item"> <a href="/atom.xml">RSS</a></li></ul><div class="mode-switch"><span class="iconfont icon-DarkTheme"></span></div></nav></header><main><section class="main-content"><section class="post-page"><div class="title-bar"><h1>Docker-高阶</h1><div class="post-info"><span>2022-11-25 13:20:24</span><span class="tags"><a href="/tags/Docker/">#Docker</a></span></div></div><article> <div class="content"><p><a target="_blank" rel="noopener" href="https://www.yuque.com/tmfl/cloud">Docker笔记</a></p>
+<h3 id="MySQL主从复制"><a href="#MySQL主从复制" class="headerlink" title="MySQL主从复制"></a>MySQL主从复制</h3><p><strong>主从复制原理</strong>：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/164518315">小白都能懂的Mysql主从复制原理（原理+实操） - 知乎 (zhihu.com)</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/panrenjun/article/details/114219097">Mysql主从同步时Slave_IO_Running：Connecting ； Slave_SQL_Running：Yes的情况故障排除_slave-sql-running防火墙-CSDN博客</a></li>
+<li></li>
+</ul>
+<ol>
+<li>创建主服务器容器实例</li>
+</ol>
+<pre><code class="hljs shell">docker run --name Mysql_master -v /DockerRegistry/mysql-master/logs:/var/log/mysql -v /DockerRegistry/mysql-master/data:/var/lib/mysql -v/DockerRegistry/mysql-master/conf:/etc/mysql/conf.d -v /DockerRegistry/mysql-master/mysql-files:/var/lib/mysql-files -p 3307:3306 -e MYSQL_ROOT_PASSWORD=root   -d mysql:8.0.21
+<span class="hljs-meta prompt_"></span>
+<span class="hljs-meta prompt_"># </span><span class="language-bash">已开启数量卷备份   备份了数据  日志  配置</span></code></pre>
+
+<ol start="2">
+<li>在配置页面下面新建my.cnf</li>
+</ol>
+<pre><code class="hljs shell">[mysqld]
+<span class="hljs-meta prompt_">#</span><span class="language-bash"><span class="hljs-comment"># 设置server_id, 同一个局域网中需要唯一</span></span>
+server_id=101
+<span class="hljs-meta prompt_">#</span><span class="language-bash"><span class="hljs-comment"># 指定不需要同步的数据库名称</span></span>
+binlog-ignore-db=mysql
+<span class="hljs-meta prompt_">#</span><span class="language-bash"><span class="hljs-comment"># 开启二进制日志功能</span></span>
+log-bin=mall-mysql-bin
+<span class="hljs-meta prompt_">#</span><span class="language-bash"><span class="hljs-comment"># 设置二进制日志使用内存大小（事务）</span></span>
+binlog_cache_size=1M
+<span class="hljs-meta prompt_">#</span><span class="language-bash"><span class="hljs-comment"># 设置使用的二进制日志格式（mixed,statement,row）</span></span>
+binlog_format=mixed
+<span class="hljs-meta prompt_">#</span><span class="language-bash"><span class="hljs-comment"># 二进制日志过期清理时间。默认值为0，表示不自动清理</span></span>
+expire_logs_days=7
+<span class="hljs-meta prompt_">#</span><span class="language-bash"><span class="hljs-comment"># 跳过主从复制中遇到的所有错误或指定类型的错误，避免slave端复制中断</span></span>
+<span class="hljs-meta prompt_">#</span><span class="language-bash"><span class="hljs-comment"># 如：1062错误是指一些主键重复，1032错误是因为主从数据库数据不一致</span></span>
+slave_skip_errors=1062</code></pre>
+
+<ol start="3">
+<li>重启mysql_master 主机实例</li>
+</ol>
+<pre><code class="hljs shell">docker restart</code></pre>
+
+<ol start="4">
+<li>进入mysql主机,并且授予对应权限</li>
+</ol>
+<pre><code class="hljs mysql">create user &#x27;slave&#x27;@&#x27;%&#x27; identified by &#x27;123456&#x27;;
+GRANT REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO &#x27;slave&#x27;@&#x27;%&#x27;;</code></pre>
+
+<ol start="5">
+<li><p>创建从服务器</p>
+<pre><code class="hljs shell">docker run --name Mysql_slave -v /DockerRegistry/mysql-slave/logs:/var/log/mysql -v /DockerRegistry/mysql-slave/data:/var/lib/mysql -v /DockerRegistry/mysql-slave/conf:/etc/mysql/conf.d -v /DockerRegistry/mysql-slave/mysql-files:/var/lib/mysql-files  -p 3308:3306 -e MYSQL_ROOT_PASSWORD=root -d mysql:8.0.21
+<span class="hljs-meta prompt_"></span>
+<span class="hljs-meta prompt_"># </span><span class="language-bash">已开启数量卷备份   备份了数据  日志  配置</span></code></pre>
+</li>
+<li><p>配置从mysql的配置文件</p>
+</li>
+</ol>
+<pre><code class="hljs shell">[mysqld]
+<span class="hljs-meta prompt_">#</span><span class="language-bash"><span class="hljs-comment"># 设置server_id, 同一个局域网内需要唯一</span></span>
+server_id=102
+<span class="hljs-meta prompt_">#</span><span class="language-bash"><span class="hljs-comment"># 指定不需要同步的数据库名称</span></span>
+binlog-ignore-db=mysql
+<span class="hljs-meta prompt_">#</span><span class="language-bash"><span class="hljs-comment"># 开启二进制日志功能，以备slave作为其它数据库实例的Master时使用</span></span>
+log-bin=mall-mysql-slave1-bin
+<span class="hljs-meta prompt_">#</span><span class="language-bash"><span class="hljs-comment"># 设置二进制日志使用内存大小（事务）</span></span>
+binlog_cache_size=1M
+<span class="hljs-meta prompt_">#</span><span class="language-bash"><span class="hljs-comment"># 设置使用的二进制日志格式（mixed,statement,row）</span></span>
+binlog_format=mixed
+<span class="hljs-meta prompt_">#</span><span class="language-bash"><span class="hljs-comment"># 二进制日志过期清理时间。默认值为0，表示不自动清理</span></span>
+expire_logs_days=7
+<span class="hljs-meta prompt_">#</span><span class="language-bash"><span class="hljs-comment"># 跳过主从复制中遇到的所有错误或指定类型的错误，避免slave端复制中断</span></span>
+<span class="hljs-meta prompt_">#</span><span class="language-bash"><span class="hljs-comment"># 如：1062错误是指一些主键重复，1032是因为主从数据库数据不一致</span></span>
+slave_skip_errors=1062
+<span class="hljs-meta prompt_">#</span><span class="language-bash"><span class="hljs-comment"># relay_log配置中继日志</span></span>
+relay_log=mall-mysql-relay-bin
+<span class="hljs-meta prompt_">#</span><span class="language-bash"><span class="hljs-comment"># log_slave_updates表示slave将复制事件写进自己的二进制日志</span></span>
+log_slave_updates=1
+<span class="hljs-meta prompt_">#</span><span class="language-bash"><span class="hljs-comment"># slave设置只读（具有super权限的用户除外）</span></span>
+read_only=1</code></pre>
+
+<ol start="7">
+<li>进入主mysql中查看mysql同步状态</li>
+</ol>
+<pre><code class="hljs mysql">show master status;</code></pre>
+
+<p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
+  class="img-loading" data-original="/%5Cimage%5CSnipaste_2023-11-05_12-48-02.png""></p>
+<ol start="8">
+<li><p>配置从数据库所属的主数据库  重启 从mysql 进入 从mysql  </p>
+<pre><code class="hljs mysql">-- 格式：
+-- change master to master_host=&#x27;宿主机ip&#x27;,master_user=&#x27;主数据库配置的主从复制用户名&#x27;,master_password=&#x27;主数据库配置的主从复制用户密码&#x27;,master_port=宿主机主数据库端口,master_log_file=&#x27;主数据库主从同步状态的文件名File&#x27;,master_log_pos=主数据库主从同步状态的Position,master_connect_retry=连接失败重试时间间隔（秒）;
+
+change master to master_host=&#x27;192.168.70.138&#x27;,master_user=&#x27;slave&#x27;,master_password=&#x27;123456&#x27;,master_port=3307,master_log_file=&#x27;mall-mysql-bin.000002&#x27;,master_log_pos=156,master_connect_retry=30;</code></pre>
+</li>
+<li><p>在从数据库中查看主从同步状态</p>
+<pre><code class="hljs MYSQL">show slave status /G;
+-- /G 另一种显示格式      不加\G 是从左到右的表格格式   加\G 是键值对的形式显示数据</code></pre>
+
+<p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
+  class="img-loading" data-original="/%5Cimage%5CSnipaste_2023-11-05_13-06-25.png""></p>
+</li>
+<li><p>在从数据库中开启主从复制</p>
+<pre><code class="hljs mysql">start slave</code></pre>
+
+<p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
+  class="img-loading" data-original="/%5Cimage%5CSnipaste_2023-11-05_15-54-53.png""></p>
+</li>
+</ol>
+<blockquote>
+<p>配置小坑</p>
+<ol>
+<li>在远程连接中 必须使用防火墙开启指定端口 不安比防火墙无法访问所有端口</li>
+<li>mysql8必须将plugin修改为<em><strong>mysql_native_password</strong></em></li>
+</ol>
+</blockquote>
+<h3 id="Redis集群配置"><a href="#Redis集群配置" class="headerlink" title="Redis集群配置"></a>Redis集群配置</h3><ol>
+<li>创建六台redis集群</li>
+</ol>
+<pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">--cluster-enabled <span class="hljs-built_in">yes</span>   开启集群模式</span>
+<span class="hljs-meta prompt_"># </span><span class="language-bash">--net host使用宿主机的IP和端口，默认</span>
+
+docker run -d --name redis-node-1 --net host --privileged=true -v /DockerRegistry/redis-cluster/share/redis-node-1:/data redis:6.0.8 --cluster-enabled yes --appendonly yes --port 6381
+docker run -d --name redis-node-2 --net host --privileged=true -v /DockerRegistry/redis-cluster/share/redis-node-2:/data redis:6.0.8 --cluster-enabled yes --appendonly yes --port 6382
+docker run -d --name redis-node-3 --net host --privileged=true -v /DockerRegistry/redis-cluster/share/redis-node-3:/data redis:6.0.8 --cluster-enabled yes --appendonly yes --port 6383
+docker run -d --name redis-node-4 --net host --privileged=true -v /DockerRegistry/redis-cluster/share/redis-node-4:/data redis:6.0.8 --cluster-enabled yes --appendonly yes --port 6384
+docker run -d --name redis-node-5 --net host --privileged=true -v /DockerRegistry/redis-cluster/share/redis-node-5:/data redis:6.0.8 --cluster-enabled yes --appendonly yes --port 6385
+docker run -d --name redis-node-6 --net host --privileged=true -v /DockerRegistry/redis-cluster/share/redis-node-6:/data redis:6.0.8 --cluster-enabled yes --appendonly yes --port 6386</code></pre>
+
+<ol start="2">
+<li><p>构建主从关系：</p>
+<ol>
+<li>进入节点1（或其中任意一个节点）:</li>
+</ol>
+   <pre><code class="hljs shell">docker exec -it redis-node-1 /bin/bash</code></pre>
+
+<ol start="2">
+<li><p>构建主从关系</p>
+<pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">宿主机IP:端口</span>   
+<span class="hljs-meta prompt_"># </span><span class="language-bash">--cluster-replicas 1 表示为每个master创建一个slave节点</span>
+redis-cli --cluster create 192.168.70.138:6381 192.168.70.138:6382 192.168.70.138:6383 192.168.70.138:6384 192.168.70.138:6385 192.168.70.138:6386 --cluster-replicas 1</code></pre>
+
+<p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
+  class="img-loading" data-original="/%5Cimage%5CSnipaste_2023-11-05_17-56-02.png""></p>
+<p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
+  class="img-loading" data-original="/%5Cimage%5CSnipaste_2023-11-05_17-56-46.png""></p>
+</li>
+<li><p>查看集群状态redis-cli -p 6381：</p>
+<pre><code class="hljs shell">redis-cli -p 6381
+cluster info
+cluster nodes</code></pre>
+
+<p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
+  class="img-loading" data-original="/%5Cimage%5CSnipaste_2023-11-05_18-04-00.png""></p>
+</li>
+</ol>
+</li>
+<li><p>主从容错迁移案例</p>
+<ol>
+<li><p>数据读写存储</p>
+<ul>
+<li><p>当使用 <code>redis-cli</code>连接redis集群时，需要添加 <code>-c</code>参数，否则可能会出现读写出错。</p>
+<blockquote>
+<p>因为根据哈希槽算法中，不同的取余值要在不用的节点中存放(书写）,我们在redis中输入的存放命令要先在CRC16中进行映射，获取数值，再将该数据进行16384进行取余，根据获取的取余数值确定应该在哪个redis-master中进行存值。不在指定的主数据库中存值会报错。</p>
+</blockquote>
+<img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
+  class="img-loading" data-original="\image\Snipaste_2023-11-05_19-08-37.png"" style="zoom:50%;" />
+
+<img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
+  class="img-loading" data-original="\image\Snipaste_2023-11-05_19-09-11.png"" style="zoom:50%;" />
+</li>
+<li><p>查看集群信息</p>
+<pre><code class="hljs shell">redis-cli --cluster check 192.168.70.138:6381</code></pre>
+
+<p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
+  class="img-loading" data-original="/%5Cimage%5CSnipaste_2023-11-05_19-15-36.png""></p>
+</li>
+</ul>
+</li>
+<li><p><strong>主从容错切换迁移</strong></p>
+<ul>
+<li><p>停掉 6381 redis     对应的从机变成了主机</p>
+<p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
+  class="img-loading" data-original="/%5Cimage%5CSnipaste_2023-11-05_19-28-45.png""></p>
+<p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
+  class="img-loading" data-original="/%5Cimage%5CSnipaste_2023-11-05_19-29-27.png""></p>
+</li>
+<li><p>恢复6381    6381变为了从机   6384变为了主机</p>
+<p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
+  class="img-loading" data-original="/%5Cimage%5CSnipaste_2023-11-05_19-30-20.png""></p>
+</li>
+<li><p>恢复6381的主机地位    停掉6384 一段时间后 再开启6384   6381主机地位恢复</p>
+<p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
+  class="img-loading" data-original="/%5Cimage%5CSnipaste_2023-11-05_19-37-11.png""></p>
+</li>
+</ul>
+</li>
+</ol>
+</li>
+<li><p>主从的扩容于缩容</p>
+<ul>
+<li><p>主从扩容</p>
+<ul>
+<li><p>新建6387、6388两个节点+新建后启动+查看是否8节点</p>
+<pre><code class="hljs shell">docker run -d --name redis-node-7 --net host --privileged=true -v /DockerRegistry/redis-cluster/share/redis-node-7:/data redis:6.0.8 --cluster-enabled yes --appendonly yes --port 6387
+docker run -d --name redis-node-8 --net host --privileged=true -v /DockerRegistry/redis-cluster/share/redis-node-8:/data redis:6.0.8 --cluster-enabled yes --appendonly yes --port 6388</code></pre>
+
+
+</li>
+<li><p>进入6387容器实例内部</p>
+</li>
+<li><p>将新增的6387节点（空槽号）作为master节点加入原集群</p>
+<ul>
+<li>将新增的6387作为master节点加入集群<br><code>redis-cli --cluster add-node自己实际lP地址:6387自己实际lP地址:6381 6387就是将要作为master新增节点</code><br>6381就是原来集群节点里面的领路人，相当于6387拜拜6381的码头从而找到组织加入集群</li>
+</ul>
+<pre><code class="hljs shell">redis-cli --cluster add-node 192.168.70.138:6387 192.168.70.138:6381</code></pre>
+
+<p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
+  class="img-loading" data-original="/%5Cimage%5CSnipaste_2023-11-05_19-47-38.png""></p>
+<p>还未分配槽位</p>
+<p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
+  class="img-loading" data-original="/%5Cimage%5CSnipaste_2023-11-05_19-53-09.png""></p>
+<p><strong>重新分配槽号</strong></p>
+<pre><code class="hljs shell">redis-cli --cluster reshard 192.168.70.138:6381</code></pre>
+
+<p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
+  class="img-loading" data-original="/%5Cimage%5CSnipaste_2023-11-05_19-58-54.png""></p>
+<p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
+  class="img-loading" data-original="/%5Cimage%5CSnipaste_2023-11-05_20-01-32.png""></p>
+</li>
+<li><p>检查集群情况      不是从新分配，每个主机匀点给6387</p>
+<p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
+  class="img-loading" data-original="/%5Cimage%5CSnipaste_2023-11-05_20-03-05.png""></p>
+</li>
+<li><p>将6388 添加为6387的从主机</p>
+<pre><code class="hljs shell">redis-cli --cluster add-node 192.168.70.138:6388 192.168.70.138:6387 --cluster-slave --cluster-master-id 1ff3a5d59f77fd8454fc531a1b8867cd2178b65b</code></pre>
+
+<p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
+  class="img-loading" data-original="/%5Cimage%5CSnipaste_2023-11-05_20-22-12.png""></p>
+<p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
+  class="img-loading" data-original="/%5Cimage%5CSnipaste_2023-11-05_20-24-45.png""></p>
+</li>
+</ul>
+</li>
+<li><p>组从缩容   删除6387 和  6388</p>
+<ul>
+<li><p>先删除从机</p>
+<pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">1. 检查容器状态，获取6388的节点编号</span> 
+redis-cli --cluster check 192.168.70.138:6381
+<span class="hljs-meta prompt_"># </span><span class="language-bash">2.将6388从集群中移除</span>  
+redis-cli --cluster del-node 192.168.70.138:6388 6388节点编号</code></pre>
+
+<p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
+  class="img-loading" data-original="/%5Cimage%5CSnipaste_2023-11-05_20-33-55.png""></p>
+</li>
+<li><p>对node7重新分配哈希槽：</p>
+<ol>
+<li>对集群重新分配哈希槽</li>
+</ol>
+   <pre><code class="hljs shell">redis-cli --cluster reshard 192.168.70.138:6381</code></pre>
+
+<p>   <img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
+  class="img-loading" data-original="/%5Cimage%5CSnipaste_2023-11-05_20-41-07.png""></p>
+<ol start="2">
+<li><p>检查集群状态</p>
+<pre><code class="hljs shell">redis-cli --cluster check 192.168.70.138:6381</code></pre>
+
+<p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
+  class="img-loading" data-original="/%5Cimage%5CSnipaste_2023-11-05_20-43-49.png""></p>
+</li>
+<li><p>删除主节点 6387</p>
+<pre><code class="hljs shell">redis-cli --cluster del-node 192.168.70.138:6387</code></pre>
+
+<p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
+  class="img-loading" data-original="/%5Cimage%5CSnipaste_2023-11-05_20-46-08.png""></p>
+</li>
+</ol>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h3 id="DockerFile"><a href="#DockerFile" class="headerlink" title="DockerFile"></a>DockerFile</h3><p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
+  class="img-loading" data-original="/%5Cimage%5CSnipaste_2023-11-06_16-20-26.png"" alt="独立于docker容器和镜像之外"></p>
+<p>Dockerfile是用来构建Docker镜像的文本文件，是由一条条<strong>构建镜像</strong>所需的指令和参数构成的<strong>脚本</strong></p>
+<blockquote>
+<p>第二种构建镜像的方法</p>
+</blockquote>
+<p>构建三步骤</p>
+<ol>
+<li>编写DockerFile文件</li>
+<li>docker build命令构建镜像</li>
+<li>docker run 运行镜像</li>
+</ol>
+<p>DockerFile内容基础知识</p>
+<ul>
+<li>每条保留字指令都必须为大写字母且后面至少跟随一个参数</li>
+<li>指令按照从上到下，顺序执行</li>
+<li><code>#</code>表示注释</li>
+<li>每条指令都会创建一个新的镜像层并对镜像进行提交</li>
+</ul>
+<blockquote>
+<p>保留字 就是关键字</p>
+</blockquote>
+<p>Docker引擎执行Docker的大致流程：</p>
+<ol>
+<li>docker从基础镜像运行一个容器</li>
+<li>执行一条指令并对容器做出修改</li>
+<li>执行类似<code>docker commit</code>的操作提交一个新的镜像层</li>
+<li>docker再基于刚提交的镜像运行一个新容器</li>
+<li>执行Dockerfile中的下一条指令，直到所有指令都执行完成</li>
+</ol>
+<p>从应用软件的角度来看，Dockerfile、Docker镜像与Docker容器分别代表软件的三个不同阶段，</p>
+<ul>
+<li>Dockerfile是软件的原材料</li>
+<li>Dockert镜像是软件的交付品</li>
+<li>Docker容器则可以认为是软件镜像的运行态，也即依照镜像运行的容器实例</li>
+</ul>
+<p>Dockerfile面向开发，Docker镜像成为交付标准，Docker容器则涉及部署与运维，三者缺一不可，合力充当Docker体系的基石。</p>
+<p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
+  class="img-loading" data-original="/%5Cimage%5CSnipaste_2023-11-06_16-31-44.png""></p>
+<h4 id="dockerfile-保留字"><a href="#dockerfile-保留字" class="headerlink" title="dockerfile 保留字"></a>dockerfile 保留字</h4><h5 id="FROM"><a href="#FROM" class="headerlink" title="FROM"></a>FROM</h5><p>基础镜像，当前新镜像是基于哪个镜像的，指定一个已经存在的镜像作为模板，第一条必须是from</p>
+<pre><code class="hljs dockerfile"><span class="hljs-comment"># FROM 镜像名</span>
+<span class="hljs-keyword">FROM</span> hub.c.<span class="hljs-number">163</span>.com/library/tomcat</code></pre>
+
+<h5 id="MAINTAINER"><a href="#MAINTAINER" class="headerlink" title="MAINTAINER"></a>MAINTAINER</h5><p>镜像维护者的姓名和邮箱地址</p>
+<pre><code class="hljs dockerfile"><span class="hljs-comment"># 非必须</span>
+<span class="hljs-keyword">MAINTAINER</span> ZhangSan zs@<span class="hljs-number">163</span>.com</code></pre>
+
+<h5 id="RUN"><a href="#RUN" class="headerlink" title="RUN"></a>RUN</h5><p>容器构建时需要运行的命令。</p>
+<p>有两种格式：</p>
+<ul>
+<li>shell格式</li>
+</ul>
+  <pre><code class="hljs dockerfile"><span class="hljs-comment"># 等同于在终端操作的shell命令</span>
+<span class="hljs-comment"># 格式：RUN &lt;命令行命令&gt;</span>
+<span class="hljs-keyword">RUN</span><span class="language-bash"> yum -y install vim</span></code></pre>
+
+<ul>
+<li><p>exec格式 </p>
+<pre><code class="hljs dockerfile"><span class="hljs-comment"># 格式：RUN [&quot;可执行文件&quot; , &quot;参数1&quot;, &quot;参数2&quot;]</span>
+<span class="hljs-keyword">RUN</span><span class="language-bash"> [<span class="hljs-string">&quot;./test.php&quot;</span>, <span class="hljs-string">&quot;dev&quot;</span>, <span class="hljs-string">&quot;offline&quot;</span>]  <span class="hljs-comment"># 等价于 RUN ./test.php dev offline</span></span></code></pre>
+
+<blockquote>
+<p><code>RUN</code>是在<code>docker build</code>时运行</p>
+</blockquote>
+</li>
+</ul>
+<h5 id="EXPOSE"><a href="#EXPOSE" class="headerlink" title="EXPOSE"></a>EXPOSE</h5><p>当前容器对外暴露出的端口。</p>
+<pre><code class="hljs dockerfile"><span class="hljs-comment"># EXPOSE 要暴露的端口</span>
+<span class="hljs-comment"># EXPOSE &lt;port&gt;[/&lt;protocol] ....</span>
+<span class="hljs-keyword">EXPOSE</span> <span class="hljs-number">3306</span> <span class="hljs-number">33060</span></code></pre>
+
+
+
+
+
+<h5 id="WORKDIR"><a href="#WORKDIR" class="headerlink" title="WORKDIR"></a>WORKDIR</h5><p>指定在创建容器后， 终端默认登录进来的工作目录。</p>
+<pre><code class="hljs dockerfile"><span class="hljs-keyword">ENV</span> CATALINA_HOME /usr/local/tomcat
+<span class="hljs-keyword">WORKDIR</span><span class="language-bash"> <span class="hljs-variable">$CATALINA_HOME</span></span></code></pre>
+
+
+
+
+
+<h5 id="ENV"><a href="#ENV" class="headerlink" title="ENV"></a>ENV</h5><p>用来在构建镜像过程中设置环境变量。</p>
+<p>这个环境变量可以在后续的任何<code>RUN</code>指令或其他指令中使用</p>
+<pre><code class="hljs dockerfile"><span class="hljs-comment"># 格式 ENV 环境变量名 环境变量值</span>
+<span class="hljs-comment"># 或者 ENV 环境变量名=值</span>
+<span class="hljs-keyword">ENV</span> MY_PATH /usr/mytest
+
+<span class="hljs-comment"># 使用环境变量</span>
+<span class="hljs-keyword">WORKDIR</span><span class="language-bash"> <span class="hljs-variable">$MY_PATH</span></span></code></pre>
+
+
+
+
+
+<h5 id="USER"><a href="#USER" class="headerlink" title="USER"></a>USER</h5><p>指定该镜像以什么样的用户去执行，如果不指定，默认是<code>root</code>。（一般不修改该配置）</p>
+<pre><code class="hljs dockerfile"><span class="hljs-comment"># USER &lt;user&gt;[:&lt;group&gt;]</span>
+<span class="hljs-keyword">USER</span> patrick</code></pre>
+
+
+
+
+
+
+
+<h5 id="VOLUME"><a href="#VOLUME" class="headerlink" title="VOLUME"></a>VOLUME</h5><p>容器数据卷，用于数据保存和持久化工作。类似于 <code>docker run</code> 的<code>-v</code>参数。</p>
+<pre><code class="hljs dockerfile"><span class="hljs-comment"># VOLUME 挂载点</span>
+<span class="hljs-comment"># 挂载点可以是一个路径，也可以是数组（数组中的每一项必须用双引号）</span>
+<span class="hljs-keyword">VOLUME</span><span class="language-bash"> /var/lib/mysql</span></code></pre>
+
+
+
+
+
+<h5 id="ADD"><a href="#ADD" class="headerlink" title="ADD"></a>ADD</h5><p>将宿主机目录下（或远程文件）的文件拷贝进镜像，且会自动处理URL和解压tar压缩包。</p>
+<h5 id="COPY"><a href="#COPY" class="headerlink" title="COPY"></a>COPY</h5><p>类似<code>ADD</code>，拷贝文件和目录到镜像中。</p>
+<p>将从构建上下文目录中<code>&lt;源路径&gt;</code>的文件目录复制到新的一层镜像内的<code>&lt;目标路径&gt;</code>位置。</p>
+<pre><code class="hljs dockerfile"><span class="hljs-keyword">COPY</span><span class="language-bash"> src dest</span>
+<span class="hljs-keyword">COPY</span><span class="language-bash"> [<span class="hljs-string">&quot;src&quot;</span>, <span class="hljs-string">&quot;dest&quot;</span>]</span>
+<span class="hljs-comment"># &lt;src源路径&gt;：源文件或者源目录</span>
+<span class="hljs-comment"># &lt;dest目标路径&gt;：容器内的指定路径，该路径不用事先建好。如果不存在会自动创建</span></code></pre>
+
+
+
+
+
+<h5 id="CMD"><a href="#CMD" class="headerlink" title="CMD"></a>CMD</h5><p>指定容器启动后要干的事情。</p>
+<p>有两种格式：</p>
+<ul>
+<li>shell格式</li>
+</ul>
+  <pre><code class="hljs dockerfile"><span class="hljs-comment"># CMD &lt;命令&gt;</span>
+<span class="hljs-keyword">CMD</span><span class="language-bash"> <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;hello world&quot;</span></span></code></pre>
+
+<ul>
+<li>exec格式</li>
+</ul>
+  <pre><code class="hljs dockerfile"><span class="hljs-comment"># CMD [&quot;可执行文件&quot;, &quot;参数1&quot;, &quot;参数2&quot; ...]</span>
+<span class="hljs-keyword">CMD</span><span class="language-bash"> [<span class="hljs-string">&quot;catalina.sh&quot;</span>, <span class="hljs-string">&quot;run&quot;</span>]</span></code></pre>
+
+<ul>
+<li><p>参数列表格式 </p>
+<pre><code class="hljs dockerfile"><span class="hljs-comment"># CMD [&quot;参数1&quot;, &quot;参数2&quot; ....]，与ENTRYPOINT指令配合使用</span></code></pre>
+
+<p>Dockerfile中如果出现多个<code>CMD</code>指令，只有最后一个生效。<code>CMD</code>会被<code>docker run</code>之后的参数替换。</p>
+<p>例如，对于tomcat镜像，执行以下命令会有不同的效果：</p>
+<pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">因为tomcat的Dockerfile中指定了 CMD [<span class="hljs-string">&quot;catalina.sh&quot;</span>, <span class="hljs-string">&quot;run&quot;</span>]</span>
+<span class="hljs-meta prompt_"># </span><span class="language-bash">所以直接docker run 时，容器启动后会自动执行 catalina.sh run</span>
+docker run -it -p 8080:8080 tomcat
+<span class="hljs-meta prompt_"></span>
+<span class="hljs-meta prompt_"># </span><span class="language-bash">指定容器启动后执行 /bin/bash</span>
+<span class="hljs-meta prompt_"># </span><span class="language-bash">此时指定的/bin/bash会覆盖掉Dockerfile中指定的 CMD [<span class="hljs-string">&quot;catalina.sh&quot;</span>, <span class="hljs-string">&quot;run&quot;</span>]</span>
+docker run -it -p 8080:8080 tomcat /bin/bash</code></pre>
+
+<p><code>CMD</code>是在<code>docker run</code>时运行，而 <code>RUN</code>是在<code>docker build</code>时运行。</p>
+</li>
+</ul>
+<h5 id="ENTRYPOINT"><a href="#ENTRYPOINT" class="headerlink" title="ENTRYPOINT"></a>ENTRYPOINT</h5><p>用来指定一个容器启动时要运行的命令。</p>
+<p>类似于<code>CMD</code>命令，但是<code>ENTRYPOINT</code>不会被<code>docker run</code>后面的命令覆盖，这些命令参数会被当做参数送给<code>ENTRYPOINT</code>指令指定的程序。</p>
+<p><code>ENTRYPOINT</code>可以和<code>CMD</code>一起用，一般是可变参数才会使用<code>CMD</code>，这里的<code>CMD</code>等于是在给<code>ENTRYPOINT</code>传参。</p>
+<p>当指定了<code>ENTRYPOINT</code>后，<code>CMD</code>的含义就发生了变化，不再是直接运行期命令，而是将<code>CMD</code>的内容作为参数传递给<code>ENTRYPOINT</code>指令，它们两个组合会变成 <code>&lt;ENTRYPOINT&gt; &quot;&lt;CMD&gt;&quot;</code>。</p>
+<p>例如：</p>
+<pre><code class="hljs dockerfile"><span class="hljs-keyword">FROM</span> nginx
+
+<span class="hljs-keyword">ENTRYPOINT</span><span class="language-bash"> [<span class="hljs-string">&quot;nginx&quot;</span>, <span class="hljs-string">&quot;-c&quot;</span>]  <span class="hljs-comment"># 定参</span></span>
+<span class="hljs-keyword">CMD</span><span class="language-bash"> [<span class="hljs-string">&quot;/etc/nginx/nginx.conf&quot;</span>] <span class="hljs-comment"># 变参</span></span></code></pre>
+
+<p>对于此Dockerfile，构建成镜像 <code>nginx:test</code>后，如果执行；</p>
+<ul>
+<li><p><code>docker run nginx test</code>，则容器启动后，会执行 <code>nginx -c /etc/nginx/nginx.conf</code></p>
+</li>
+<li><p><code>docker run nginx:test /app/nginx/new.conf</code>，则容器启动后，会执行 <code>nginx -c /app/nginx/new.conf</code></p>
+</li>
+</ul>
+<h4 id="dockerfile案例演示"><a href="#dockerfile案例演示" class="headerlink" title="dockerfile案例演示"></a>dockerfile案例演示</h4><p>创建centos具有vim ifconfig java8的镜像</p>
+<pre><code class="hljs dockerfile"><span class="hljs-keyword">FROM</span> centos:<span class="hljs-number">7</span>
+<span class="hljs-keyword">MAINTAINER</span> zzyy&lt;zzyybs@<span class="hljs-number">126</span>.com&gt;
+<span class="hljs-keyword">ENV</span> MYPATH /usr/local 
+<span class="hljs-keyword">WORKDIR</span><span class="language-bash"> <span class="hljs-variable">$MYPATH</span></span>
+
+<span class="hljs-comment">#安装vim编辑器</span>
+<span class="hljs-keyword">RUN</span><span class="language-bash"> yum -y install vim</span>
+<span class="hljs-comment">#安装1 fconfig命令查看网络IP </span>
+<span class="hljs-keyword">RUN</span><span class="language-bash"> yum -y install net-tools</span>
+<span class="hljs-comment">#安装java8及lib库</span>
+<span class="hljs-keyword">RUN</span><span class="language-bash"> yum -y install glibc.i686</span>
+<span class="hljs-keyword">RUN</span><span class="language-bash"> <span class="hljs-built_in">mkdir</span> /usr/local/java</span>
+<span class="hljs-comment">#ADD是相对路径jar，把jdk8u171-1inux.x64.tar.gz添加到容器中，安装包必须要和Dockerfile文件在同一位置</span>
+<span class="hljs-keyword">ADD</span><span class="language-bash"> jdk-8u181-linux-x64.tar.gz /usr/local/java/</span>
+<span class="hljs-comment">#配置java环境变量</span>
+<span class="hljs-keyword">ENV</span> JAVA_HOME /usr/local/java/jdk1.<span class="hljs-number">8.0</span>_181
+<span class="hljs-keyword">ENV</span> JRE HOME $JAVA_HOME/jre 
+<span class="hljs-keyword">ENV</span> CLASSPATH $JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar:$JRE_HOME/lib:$CLASSPATH 
+<span class="hljs-keyword">ENV</span> PATH $JAVA_HOME/bin:$PATH 
+<span class="hljs-keyword">EXPOSE</span> <span class="hljs-number">80</span>
+<span class="hljs-keyword">CMD</span><span class="language-bash"> <span class="hljs-built_in">echo</span> <span class="hljs-variable">$MYPATH</span></span>
+<span class="hljs-keyword">CMD</span><span class="language-bash"> <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;success--------------ok&quot;</span></span>
+<span class="hljs-keyword">CMD</span><span class="language-bash"> /bin/bash</span></code></pre>
+
+<p>执行命令 docker build</p>
+<pre><code class="hljs shell">docker build -t centosjava8:1.5 .</code></pre>
+
+<blockquote>
+<p>显示vim安装失败的话 先将centos版本号变为7 同时 写为 FROM centos:7 ，并且重启 vm即可</p>
+</blockquote>
+<h3 id="虚悬镜像"><a href="#虚悬镜像" class="headerlink" title="虚悬镜像"></a>虚悬镜像</h3><p>仓库名和镜像名都是none的镜像的，俗称dangling image</p>
+<pre><code class="hljs dockerfile"><span class="hljs-keyword">FROM</span> centos:<span class="hljs-number">7</span>
+<span class="hljs-keyword">CMD</span><span class="language-bash"> <span class="hljs-built_in">echo</span> <span class="hljs-string">&#x27;action success &#x27;</span></span></code></pre>
+
+<pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">构建时候没有镜像名、tag</span>
+docker build .</code></pre>
+
+<p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
+  class="img-loading" data-original="/%5Cimage%5CSnipaste_2023-11-07_12-10-52.png""></p>
+<p>列出docker中的虚悬镜像：</p>
+<pre><code class="hljs shell">docker image ls -f dangling=true</code></pre>
+
+<p>虚悬镜像一般是因为一些错误而出现的，没有存在价值，可以删除：</p>
+<pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">删除所有的虚悬镜像</span>
+docker image prune</code></pre>
+
+
+
+<p>.</p>
+<h3 id="发布微服务项目到Docker容器"><a href="#发布微服务项目到Docker容器" class="headerlink" title="发布微服务项目到Docker容器"></a>发布微服务项目到Docker容器</h3><ol>
+<li>将项目jar包发送到 服务器上面</li>
+<li>编写dockerfile文件</li>
+</ol>
+<pre><code class="hljs dockerfile"><span class="hljs-keyword">FROM</span> java:<span class="hljs-number">8</span>
+<span class="hljs-keyword">MAINTAINER</span> hcj
+
+<span class="hljs-comment"># 在主机 /var/lib/docker目录下创建一个临时文件，并链接到容器的 /tmp</span>
+<span class="hljs-keyword">VOLUME</span><span class="language-bash"> /tmp2</span>
+
+<span class="hljs-comment"># 将jar包添加到容器中，并命名为 springboot_docker.jar</span>
+<span class="hljs-keyword">ADD</span><span class="language-bash"> SpringBoot-Demo_1-1.0-SNAPSHOT.jar /springboot_docker.jar</span>
+<span class="hljs-comment"># 运行jar包</span>
+<span class="hljs-keyword">RUN</span><span class="language-bash"> bash -c <span class="hljs-string">&#x27;touch /springboot_docker.jar&#x27;</span></span>
+<span class="hljs-keyword">ENTRYPOINT</span><span class="language-bash"> [<span class="hljs-string">&quot;java&quot;</span>, <span class="hljs-string">&quot;-jar&quot;</span>, <span class="hljs-string">&quot;/springboot_docker.jar&quot;</span>]</span>
+
+<span class="hljs-comment"># SpringBoot项目配置的端口号为8080，需要将8080暴露出去</span>
+<span class="hljs-keyword">EXPOSE</span> <span class="hljs-number">8080</span></code></pre>
+
+<ol start="3">
+<li>运行docker容器</li>
+</ol>
+<pre><code class="hljs shell">docker build -t hcj_jar:1.3 .</code></pre>
+
+<ol start="4">
+<li>启动容器：</li>
+</ol>
+<pre><code class="hljs shell">docker run -p8081:8080 --name springbootjar b16d189b87be</code></pre>
+
+<p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
+  class="img-loading" data-original="/%5Cimage%5CSnipaste_2023-11-07_13-49-50.png""></p>
+<h3 id="Docker-网络"><a href="#Docker-网络" class="headerlink" title="Docker 网络"></a>Docker 网络</h3><p>docker安装并启动服务后，会在宿主机中添加一个虚拟网卡。</p>
+<p>在Docker服务启动前，使用 <code>ifconfig</code> 或 <code>ip addr</code> 查看网卡信息：</p>
+<ul>
+<li><p><code>ens33</code>或<code>eth0</code>：本机网卡</p>
+</li>
+<li><p><code>lo</code>：本机回环网络网卡</p>
+<blockquote>
+<p> 计算机以回环地址发送的消息，并不会由链路层送走，而是被本机网络层捕获。</p>
+</blockquote>
+</li>
+<li><p>可能有<code>virbr0</code>（CentOS安装时如果选择的有相关虚拟化服务，就会多一个以网桥连接的私网地址的<code>virbr0</code>网卡，作用是为连接虚拟网卡提供NAT访问外网的功能。如果要移除该服务，可以使用 <code>yum remove libvirt-libs.x86_64</code>）</p>
+</li>
+</ul>
+<p>使用 <code>systemctl start docker</code>启动Docker服务后，会多出一个 <code>docker0</code> 网卡。</p>
+<p><strong>作用：</strong></p>
+<ul>
+<li><p>容器间的互联和通信以及端口映射</p>
+</li>
+<li><p>容器IP变动时候可以通过服务名直接网络通信而不受到影响</p>
+</li>
+</ul>
+<p>Docker容器的网络隔离，是通过Linux内核特性 <code>namespace</code>和 <code>cgroup</code> 实现的。</p>
+<h4 id="docker-网络模式命令"><a href="#docker-网络模式命令" class="headerlink" title="docker 网络模式命令"></a>docker 网络模式命令</h4><p>查看Docker网络模式：</p>
+<pre><code class="hljs shell">docker network ls</code></pre>
+
+<p>如果没有修改过docker network，则默认有3个网络模式：</p>
+<ul>
+<li><p><code>bridge</code></p>
+</li>
+<li><p><code>host</code></p>
+</li>
+<li><p><code>none</code></p>
+</li>
+</ul>
+<img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
+  class="img-loading" data-original="\image\Snipaste_2023-11-07_14-21-44.png"" style="zoom:50%;" />
+
+<p><strong>添加Docker网络：</strong></p>
+<pre><code class="hljs shell">docker network add xxx</code></pre>
+
+<p><strong>删除Docker网络：</strong></p>
+<pre><code class="hljs shell">docker network rm xxx</code></pre>
+
+<p><strong>查看网络元数据：</strong></p>
+<pre><code class="hljs shell">docker network inspect xxx</code></pre>
+
+<p><strong>删除所有无效的网络：</strong></p>
+<pre><code class="hljs shell">docker network prune</code></pre>
+
+<h4 id="常见的Docker-网络模式"><a href="#常见的Docker-网络模式" class="headerlink" title="常见的Docker 网络模式"></a>常见的Docker 网络模式</h4><p>Docker 的网络模式：</p>
+<table>
+<thead>
+<tr>
+<th>网络模式</th>
+<th>简介</th>
+<th>使用方式</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>bridge</td>
+<td>为每一个容器分配、设置IP等，并将容器连接到一个<code>docker0</code>虚拟网桥，默认为该模式</td>
+<td><code>--network bridge</code></td>
+</tr>
+<tr>
+<td>host</td>
+<td>容器将不会虚拟出自己的网卡、配置自己的IP等，而是使用宿主机的IP和端口</td>
+<td><code>--network host</code></td>
+</tr>
+<tr>
+<td>none</td>
+<td>容器有独立的 Network namespace，但并没有对齐进行任何网络设置，如分配 <code>veth pari</code> 和 网桥连接、IP等</td>
+<td><code>--network none</code></td>
+</tr>
+<tr>
+<td>container</td>
+<td>新创建的容器不会创建自己的网卡和配置自己的IP，而是和一个指定的容器共享IP、端口范围等</td>
+<td><code>--network container:NAME或者容器ID</code></td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>none网络模式是一种特殊的模式，它将容器与宿主机隔离开来，不提供任何网络能力。</p>
+<p>在none网络模式下，容器将无法访问外部网络，也无法被外部网络访问到。这种模式适用于某些特殊场景，比如需要在容器内运行一些独立的、与网络无关的应用程序。</p>
+<p><a target="_blank" rel="noopener" href="https://blog.51cto.com/u_16213450/8157554">docker 网络 none_mob64ca12f4d1ad的技术博客_51CTO博客</a></p>
+</blockquote>
+<p>查看某个容器的网络模式：</p>
+<pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">通过inspect获取容器信息，最后20行即为容器的网络模式信息</span>
+docker inspect 容器ID | tail -n 20</code></pre>
+
+
+
+
+
+<h5 id="bridge-网络模式"><a href="#bridge-网络模式" class="headerlink" title="bridge 网络模式"></a>bridge 网络模式</h5><p>外界通过宿主机端口访问后，再交由底层NAT进行转发到docker容器网络中。</p>
+<p><strong>docker0</strong></p>
+<p>Docker 服务默认会创建一个<code>docker0</code>网桥（其上有一个<code>docker0</code>内部接口），该桥接网络的名称为 <code>docker0</code>，它在<strong>内核层</strong>连通了其他的物理或虚拟网卡，这就将所有容器和本地主机都放到<code>同一个物理网络</code>。</p>
+<p>Docker默认指定了<code>docker0</code>接口的IP地址和子网掩码，让主机和容器之间可以通过网桥互相通信。</p>
+<p>查看<code>bridge</code>网络的详细信息，并通过<code>grep</code>获取名称：</p>
+<pre><code class="hljs shell">docker network inspect bridge | grep name</code></pre>
+
+<p>可以看到其名称为<code>docker0</code>。</p>
+<img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
+  class="img-loading" data-original="\image\Snipaste_2023-11-07_15-25-50.png"" style="zoom:50%;" />
+
+
+
+<p><strong>bridge</strong></p>
+<p>Docker使用Linux桥接，在宿主机虚拟一个<code>Docker</code>容器网桥（<code>docker0</code>），Docker启动一个容器时会根据<code>Docker</code>网桥的网段分配给容器一个IP地址，称为<code>Container-IP</code>，同时Docker网桥是每个容器的默认网关。因为在同一个宿主机内的容器接入同一个网桥，这样容器之间就能够通过容器的<code>Container-IP</code>直接通信。</p>
+<p><code>docker run</code>的时候，没有指定<code>--network</code>的话，默认使用的网桥模式就是<code>bridge</code>，使用的就是<code>docker0</code>。在宿主机<code>ifconfig</code>就可以看到<code>docker0</code>和自己<code>create</code>的<code>network</code>。</p>
+<p>网桥<code>docker0</code>创建一对对等虚拟设备接口，一个叫<code>veth</code>，另一个叫<code>eth0</code>，成对匹配：</p>
+<p>整个宿主机的网桥模式都是<code>docker0</code>，类似一个交换机有一堆接口，每个接口叫 <code>veth</code>，在本地主机和容器内分别创建一个虚拟接口，并让他们彼此联通（这样一对接口叫做 <code>veth pair</code>）。</p>
+<p>每个容器实例内部也有一块网卡，容器内的网卡接口叫做<code>eth0</code>。</p>
+<p><code>docker0</code>上面的每个<code>veth</code>匹配某个容器实例内部的<code>eth0</code>，两两配对，一一匹配。</p>
+<img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
+  class="img-loading" data-original="\image\Snipaste_2023-11-07_15-29-01.png"" style="zoom:50%;" />
+
+<p>例如：</p>
+<p>宿主机</p>
+<pre><code class="hljs shell">ip addr
+<span class="hljs-meta prompt_"># </span><span class="language-bash">每个veth都有个编号：vethXXXXXX</span>
+<span class="hljs-meta prompt_"># </span><span class="language-bash">@符号后面对应就是容器内的eth0网卡编号9</span></code></pre>
+
+<img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
+  class="img-loading" data-original="\image\Snipaste_2023-11-07_15-48-29.png"" style="zoom:50%;" />
+
+<p>docker容器</p>
+<pre><code class="hljs shell">ip addr
+<span class="hljs-meta prompt_"># </span><span class="language-bash">容器内的网卡为 eth0</span>
+<span class="hljs-meta prompt_"># </span><span class="language-bash">@符号后面就是宿主机上对应的veth网卡的编号10</span></code></pre>
+
+<img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
+  class="img-loading" data-original="\image\Snipaste_2023-11-07_15-48-56.png"" style="zoom:50%;" />
+
+<p>.</p>
+<h5 id="host-网络模式"><a href="#host-网络模式" class="headerlink" title="host 网络模式"></a>host 网络模式</h5><p>直接使用宿主机的 IP 地址与外界进行通信，不再需要额外进行 NAT 转换。</p>
+<p>容器将不会获得一个独立的 Network Namespace，而是和宿主机共用一个 Network space。</p>
+<p>容器将不会虚拟出自己的网卡，而是直接使用宿主机的 IP 和端口。</p>
+<img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
+  class="img-loading" data-original="\image\Snipaste_2023-11-07_15-57-43.png"" style="zoom:50%;" />
+
+<p>如果在 <code>docker run</code> 命令中同时使用了 <code>--network host</code> 和 <code>-p</code>端口映射，例如：</p>
+<pre><code class="hljs shell">docker run -p 8082:8080 --network host tomcat</code></pre>
+
+<p>那么会出现一个警告：</p>
+<pre><code class="hljs plain">WARNING: Published ports are discarded when using host network mode</code></pre>
+
+<p>因为此时已经使用了<code>host</code>模式，本身就是直接使用的宿主机的IP和端口，此时的<code>-p</code>端口映射就没有了意义，也不会生效，端口号还是会以主机端口号为主。p</p>
+<p>正确做法是：不再进行<code>-p</code>端口映射，或者改用<code>bridge</code>模式</p>
+<h5 id="none模式"><a href="#none模式" class="headerlink" title="none模式"></a>none模式</h5><p>禁用网络功能。</p>
+<p>在<code>none</code>模式下，并不为docker容器进行任何网络配置。进入容器内，使用 <code>ip addr</code>查看网卡信息，只能看到 <code>lo</code>（本地回环网络<code>127.0.0.1</code>网卡）。</p>
+<pre><code class="hljs shell">docker run -p 8082:8080 --network host tomcat</code></pre>
+
+
+
+
+
+
+
+<h5 id="container-模式"><a href="#container-模式" class="headerlink" title="container 模式"></a>container 模式</h5><p>新建的容器和已经存在的一个容器共享网络IP配置，而不是和宿主机共享。</p>
+<p>新创建的容器不会创建自己的网卡、IP，而是和一个指定的容器共享IP、端口范围。两个容器除了网络共享，其他的如文件系统、进程列表依然是隔离的。</p>
+<img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
+  class="img-loading" data-original="\image\Snipaste_2023-11-07_16-22-03.png"" style="zoom:50%;" />
+
+<pre><code class="hljs shell">docker run -it --name alpine1 alpine /bin/sh
+<span class="hljs-meta prompt_"></span>
+<span class="hljs-meta prompt_"># </span><span class="language-bash">指定和 alpine1 容器共享网络</span>
+docker run -it --name alpine2 --network container:alpine1 alpine</code></pre>
+
+<blockquote>
+<p>Alpine Linux是一款独立的、非商业的通用Linux发行版，专为追求安全性、简单性和资源效率的用户而设计。可能很多人没听说过这个Liux发行版本，但是经常用Docker的朋友可能都用过，因为他小，简单，安全而著称，所以作为基础镜像是非常好的一个选择，可谓是麻雀虽小但五脏俱全，镜像非常小巧，不到6M的大小，所以特别适合容器打包I</p>
+</blockquote>
+<img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
+  class="img-loading" data-original="\image\Snipaste_2023-11-07_16-29-41.png"" style="zoom:50%;" />
+
+<p>此时使用 <code>ip addr</code>查看两台容器的网络，会发现两台容器的<code>eth0</code>网卡内的IP等信息完全相同。</p>
+<p>如果关掉了<code>alpine1</code>容器，因为<code>alpine2</code>的网络使用的<code>alpine1</code>共享网络，所以关掉<code>alpin1</code>后，<code>alpine2</code>的<code>eth0</code>网卡也随之消失了。</p>
+<h4 id="自定义网络"><a href="#自定义网络" class="headerlink" title="自定义网络"></a>自定义网络</h4><p>容器间的互联和通信以及端口映射。</p>
+<p>容器 IP 变动时候可以通过服务名直接网络通信而不受影响。（类似Eureka，通过服务名直接互相通信，而不是写死IP地址）。</p>
+<p>docker中还有一个 <code>--link</code> 进行容器网络互联，但是已经被标记为过时的，可能会在将来的版本中移除这个功能。推荐使用自定义网络替换link。</p>
+<blockquote>
+<p>在自定义网络中，可以使用Docker的DNS功能来为容器提供名称解析服务。当一个容器需要访问另一个容器时，它可以通过容器的名称或服务名来获取对方的IP地址，从而实现主机名和IP地址的对应关系。</p>
+</blockquote>
+<p>自定义桥接网络（自定义网络默认使用的是桥接网络 <code>bridge</code>）：</p>
+<ol>
+<li>新建自定义网络</li>
+</ol>
+   <pre><code class="hljs shell">docker network create hcj_network</code></pre>
+
+<ol start="2">
+<li><p>查看网络列表</p>
+<pre><code class="hljs shell">docker network ls</code></pre>
+</li>
+<li><p>创建容器时 加入我们指定的自定义网络</p>
+<pre><code class="hljs shell">docker run -it --name alpine1 --network hcj_networke alpine
+docker run -it --name alpine2 --network hcj_networke alpine</code></pre>
+</li>
+<li><p>进入容器  使用ping命令测试连接alpine2容器名字 </p>
+<img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
+  class="img-loading" data-original="\image\Snipaste_2023-11-07_17-03-57.png"" style="zoom:50%;" /></li>
+</ol>
+<h3 id="Docker-compose容器编排"><a href="#Docker-compose容器编排" class="headerlink" title="Docker-compose容器编排"></a><strong>Docker-compose容器编排</strong></h3><p><code>Docker-Compose</code> 是 Docker 官方的开源项目，负责实现对Docker容器集群的快速编排。</p>
+<p><code>Docker-Compose</code>可以管理多个Docker容器组成一个应用。需要定义一个yaml格式的配置文件 <code>docker-compose.yml</code>，配置好多个容器之间的调用关系，然后只需要一个命令就能同时启动&#x2F;关闭这些容器。</p>
+<p>Docker建议我们每个容器中只运行一个服务，因为Docker容器本身占用资源极少，所以最好是将每个服务单独的分割开来。但是如果我们需要同时部署多个服务，每个服务单独构建镜像构建容器就会比较麻烦。所以 Docker 官方推出了 <code>docker-compose</code> 多服务部署的工具。</p>
+<p>Compose允许用户通过一个单独的 <code>docker-compose.yml</code> 模板文件来定义一组相关联的应用容器为一个项目（<code>project</code>）。<strong>可以很容易的用一个配置文件定义一个多容器的应用，然后使用一条指令安装这个应用的所有依赖，完成构建</strong>。</p>
+<p>新版docker自带compose</p>
+<pre><code class="hljs shell">docker compose version  
+<span class="hljs-meta prompt_"># </span><span class="language-bash">Docker Compose version v2.21.0</span></code></pre>
+
+
+
+
+
+<p><strong>compose核心概念</strong></p>
+<ul>
+<li>一个文件 docker-compose.yml</li>
+<li>两要素<ul>
+<li>服务：一个个应用容器实例</li>
+<li>工程：一组关联的应用容器组成的一个完整业务单元，在docker-compose.yml文件中定义。</li>
+</ul>
+</li>
+</ul>
+<p><strong>compose常见命令</strong></p>
+<img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
+  class="img-loading" data-original="\image\Snipaste_2023-11-07_19-31-00.png"" style="zoom:50%;" />
+
+
+
+
+
+<h4 id="使用compose编排服务器"><a href="#使用compose编排服务器" class="headerlink" title="使用compose编排服务器"></a>使用compose编排服务器</h4><ol>
+<li><p>编排application.yml文件</p>
+<pre><code class="hljs yaml"><span class="hljs-attr">version:</span> <span class="hljs-string">&quot;3&quot;</span>
+
+<span class="hljs-comment"># 配置各个容器服务</span>
+<span class="hljs-attr">services:</span>
+  <span class="hljs-attr">micr_yinglibao_api:</span>
+    <span class="hljs-attr">image:</span> <span class="hljs-string">micr-api-1.0.0</span>
+    <span class="hljs-attr">container_name:</span> <span class="hljs-string">micr-api</span>  <span class="hljs-comment"># 容器名称，如果不指定，会生成一个服务名加上前缀的容器名</span>
+    <span class="hljs-attr">volumes:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">/DockerRegistry/yinglibao/api:/data</span>
+    <span class="hljs-attr">networks:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">springboot_yinglibao</span>
+      
+  <span class="hljs-attr">micr_yinglibao_commo:</span>  
+    <span class="hljs-attr">image:</span> <span class="hljs-string">micr-common-1.0.0</span>
+    <span class="hljs-attr">container_name:</span> <span class="hljs-string">micr-common</span>  <span class="hljs-comment"># 容器名称，如果不指定，会生成一个服务名加上前缀的容器名</span>
+    <span class="hljs-attr">volumes:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">/DockerRegistry/yinglibao/common:/data</span>
+    <span class="hljs-attr">networks:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">springboot_yinglibao</span> 
+      
+  <span class="hljs-attr">micr_yinglibao_dataservice:</span>      
+    <span class="hljs-attr">image:</span> <span class="hljs-string">micr-dataservice-0.0.1-SNAPSHOT</span>
+    <span class="hljs-attr">container_name:</span> <span class="hljs-string">micr-dataservice</span>  <span class="hljs-comment"># 容器名称，如果不指定，会生成一个服务名加上前缀的容器名</span>
+    <span class="hljs-attr">volumes:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">/DockerRegistry/yinglibao/dataservice:/data</span>
+    <span class="hljs-attr">networks:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">springboot_yinglibao</span> 
+    <span class="hljs-attr">ports:</span> 
+      <span class="hljs-bullet">-</span> <span class="hljs-string">&quot;8086:8086&quot;</span>
+
+  <span class="hljs-attr">micr_yinglibao_web:</span>      
+    <span class="hljs-attr">image:</span> <span class="hljs-string">mirc-web-0.0.1-SNAPSHOT</span>
+    <span class="hljs-attr">container_name:</span> <span class="hljs-string">micr-web</span>  <span class="hljs-comment"># 容器名称，如果不指定，会生成一个服务名加上前缀的容器名</span>
+    <span class="hljs-attr">volumes:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">/DockerRegistry/yinglibao/web:/data</span>
+    <span class="hljs-attr">networks:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">springboot_yinglibao</span> 
+    <span class="hljs-attr">ports:</span> 
+      <span class="hljs-bullet">-</span> <span class="hljs-string">&quot;8088:8088&quot;</span>
+
+  <span class="hljs-attr">micr_yinglibao_pay:</span>      
+    <span class="hljs-attr">image:</span> <span class="hljs-string">micr-pay-0.0.1-SNAPSHOT</span>
+    <span class="hljs-attr">container_name:</span> <span class="hljs-string">micr-pay</span>  <span class="hljs-comment"># 容器名称，如果不指定，会生成一个服务名加上前缀的容器名</span>
+    <span class="hljs-attr">volumes:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">/DockerRegistry/yinglibao/pay:/data</span>
+    <span class="hljs-attr">networks:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">springboot_yinglibao</span> 
+    <span class="hljs-attr">ports:</span> 
+      <span class="hljs-bullet">-</span> <span class="hljs-string">&quot;9000:9000&quot;</span>
+
+  <span class="hljs-attr">micr_yinglibao_task:</span>      
+    <span class="hljs-attr">image:</span> <span class="hljs-string">micr-task-0.0.1-SNAPSHOT</span>
+    <span class="hljs-attr">container_name:</span> <span class="hljs-string">micr-task</span>  <span class="hljs-comment"># 容器名称，如果不指定，会生成一个服务名加上前缀的容器名</span>
+    <span class="hljs-attr">volumes:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">/DockerRegistry/yinglibao/task:/data</span>
+    <span class="hljs-attr">networks:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">springboot_yinglibao</span> 
+    <span class="hljs-attr">ports:</span> 
+      <span class="hljs-bullet">-</span> <span class="hljs-string">&quot;8087:8087&quot;</span>
+
+     
+<span class="hljs-comment">#redis:</span>
+<span class="hljs-comment">#   image: redis:6.0.8</span>
+<span class="hljs-comment">#   ports:</span>
+<span class="hljs-comment">#     - &quot;6379:6379&quot;</span>
+<span class="hljs-comment">#   volumes:</span>
+<span class="hljs-comment">#     - /app/redis/redis.conf:/etc/redis/redis.conf</span>
+<span class="hljs-comment">#     - /app/redis/data:data</span>
+<span class="hljs-comment">#   networks:</span>
+<span class="hljs-comment">#     - springboot_network</span>
+<span class="hljs-comment">#   command: redis-server /etc/redis/redis.conf</span>
+
+<span class="hljs-comment"># mysql:</span>
+<span class="hljs-comment">#   image: mysql:</span>
+<span class="hljs-comment">#   environment:</span>
+<span class="hljs-comment">#     MYSQL_ROOT_PASSWORD: &#x27;root&#x27;</span>
+<span class="hljs-comment">#     MYSQL_ALLOW_EMPTY_PASSWORD: &#x27;no&#x27;</span>
+<span class="hljs-comment">#     MYSQL_DATABASE: &#x27;yinglibao</span>
+<span class="hljs-comment">#     MYSQL_USER: &#x27;springboot&#x27;</span>
+<span class="hljs-comment">#     MYSQL_PASSWORD: &#x27;springboot&#x27;</span>
+<span class="hljs-comment">#   ports:</span>
+<span class="hljs-comment">#     - &quot;3306:3306&quot;</span>
+<span class="hljs-comment">#   volumes:</span>
+<span class="hljs-comment">#     - /app/mysql/db:/var/lib/mysql</span>
+<span class="hljs-comment">#     - /app/mysql/conf/my.cnf:/etc/my.cnf</span>
+<span class="hljs-comment">#     - /app/mysql/init:/docker-entrypoint-initdb.d</span>
+<span class="hljs-comment">#   networks:</span>
+<span class="hljs-comment">#     - springboot_network</span>
+<span class="hljs-comment">#   command: --default-authentication-plugin=mysql_native_password # 解决外部无法访问</span>
+
+<span class="hljs-attr">networks:</span>
+  <span class="hljs-comment"># 创建 springboot_network 网桥网络</span>
+  <span class="hljs-attr">springboot_yinglibao:</span>
+</code></pre>
+</li>
+<li><p>编写完成<code>docker-compose.yml</code>后，进行语法检查：</p>
+</li>
+</ol>
+<pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">进行语法检查</span>
+docker compose config -q</code></pre>
+
+<ol start="3">
+<li>编写DockerFile 将jar包封装到Docker镜像中</li>
+</ol>
+<pre><code class="hljs dockerfile"><span class="hljs-keyword">FROM</span> java:<span class="hljs-number">8</span>
+<span class="hljs-keyword">MAINTAINER</span> hcj
+
+<span class="hljs-comment"># 在主机 /var/lib/docker目录下创建一个临时文件，并链接到容器的 /tmp</span>
+<span class="hljs-keyword">VOLUME</span><span class="language-bash"> /tmp2</span>
+
+<span class="hljs-comment"># 将jar包添加到容器中，并命名为 springboot_docker.jar</span>
+<span class="hljs-keyword">ADD</span><span class="language-bash"> micr-api-1.0.0.jar /micr-api-1.0.0.jar</span>
+<span class="hljs-comment"># 运行jar包</span>
+<span class="hljs-keyword">RUN</span><span class="language-bash"> bash -c <span class="hljs-string">&#x27;touch micr-api-1.0.0.jar&#x27;</span></span>
+<span class="hljs-keyword">ENTRYPOINT</span><span class="language-bash"> [<span class="hljs-string">&quot;java&quot;</span>, <span class="hljs-string">&quot;-jar&quot;</span>, <span class="hljs-string">&quot;/micr-api-1.0.0.jar&quot;</span>]</span>
+
+<span class="hljs-comment"># SpringBoot项目配置的端口号为8080，需要将8080暴露出去</span>
+<span class="hljs-keyword">EXPOSE</span> <span class="hljs-number">8080</span>
+
+
+<span class="hljs-keyword">FROM</span> java:<span class="hljs-number">8</span>
+<span class="hljs-keyword">MAINTAINER</span> hcj
+
+<span class="hljs-comment"># 在主机 /var/lib/docker目录下创建一个临时文件，并链接到容器的 /tmp</span>
+<span class="hljs-keyword">VOLUME</span><span class="language-bash"> /tmp2</span>
+
+<span class="hljs-comment"># 将jar包添加到容器中，并命名为 springboot_docker.jar</span>
+<span class="hljs-keyword">ADD</span><span class="language-bash"> micr-common-1.0.0.jar /micr-common-1.0.0.jar</span>
+<span class="hljs-comment"># 运行jar包</span>
+<span class="hljs-keyword">RUN</span><span class="language-bash"> bash -c <span class="hljs-string">&#x27;touch micr-common-1.0.0.jar&#x27;</span></span>
+<span class="hljs-keyword">ENTRYPOINT</span><span class="language-bash"> [<span class="hljs-string">&quot;java&quot;</span>, <span class="hljs-string">&quot;-jar&quot;</span>, <span class="hljs-string">&quot;micr-common-1.0.0.jar&quot;</span>]</span>
+
+<span class="hljs-comment"># SpringBoot项目配置的端口号为8080，需要将8080暴露出去</span>
+<span class="hljs-keyword">EXPOSE</span> <span class="hljs-number">8080</span>
+
+
+
+<span class="hljs-keyword">FROM</span> java:<span class="hljs-number">8</span>
+<span class="hljs-keyword">MAINTAINER</span> hcj
+
+<span class="hljs-comment"># 在主机 /var/lib/docker目录下创建一个临时文件，并链接到容器的 /tmp</span>
+<span class="hljs-keyword">VOLUME</span><span class="language-bash"> /tmp2</span>
+
+<span class="hljs-comment"># 将jar包添加到容器中，并命名为 springboot_docker.jar</span>
+<span class="hljs-keyword">ADD</span><span class="language-bash"> micr-dataservice-0.0.1-SNAPSHOT.jar /micr-dataservice-0.0.1-SNAPSHOT.jar</span>
+<span class="hljs-comment"># 运行jar包</span>
+<span class="hljs-keyword">RUN</span><span class="language-bash"> bash -c <span class="hljs-string">&#x27;touch micr-dataservice-0.0.1-SNAPSHOT.jar&#x27;</span></span>
+<span class="hljs-keyword">ENTRYPOINT</span><span class="language-bash"> [<span class="hljs-string">&quot;java&quot;</span>, <span class="hljs-string">&quot;-jar&quot;</span>, <span class="hljs-string">&quot;/micr-dataservice-0.0.1-SNAPSHOT.jar&quot;</span>]</span>
+
+<span class="hljs-comment"># SpringBoot项目配置的端口号为8080，需要将8080暴露出去</span>
+<span class="hljs-keyword">EXPOSE</span> <span class="hljs-number">8086</span>
+
+<span class="hljs-keyword">FROM</span> java:<span class="hljs-number">8</span>
+<span class="hljs-keyword">MAINTAINER</span> hcj
+
+<span class="hljs-comment"># 在主机 /var/lib/docker目录下创建一个临时文件，并链接到容器的 /tmp</span>
+<span class="hljs-keyword">VOLUME</span><span class="language-bash"> /tmp2</span>
+
+<span class="hljs-comment"># 将jar包添加到容器中，并命名为 springboot_docker.jar</span>
+<span class="hljs-keyword">ADD</span><span class="language-bash"> mirc-web-0.0.1-SNAPSHOT.jar /mirc-web-0.0.1-SNAPSHOT.jar</span>
+<span class="hljs-comment"># 运行jar包</span>
+<span class="hljs-keyword">RUN</span><span class="language-bash"> bash -c <span class="hljs-string">&#x27;touch mirc-web-0.0.1-SNAPSHOT.jar&#x27;</span></span>
+<span class="hljs-keyword">ENTRYPOINT</span><span class="language-bash"> [<span class="hljs-string">&quot;java&quot;</span>, <span class="hljs-string">&quot;-jar&quot;</span>, <span class="hljs-string">&quot;/mirc-web-0.0.1-SNAPSHOT.jar&quot;</span>]</span>
+
+<span class="hljs-comment"># SpringBoot项目配置的端口号为8080，需要将8080暴露出去</span>
+<span class="hljs-keyword">EXPOSE</span> <span class="hljs-number">8088</span>
+
+<span class="hljs-keyword">FROM</span> java:<span class="hljs-number">8</span>
+<span class="hljs-keyword">MAINTAINER</span> hcj
+
+<span class="hljs-comment"># 在主机 /var/lib/docker目录下创建一个临时文件，并链接到容器的 /tmp</span>
+<span class="hljs-keyword">VOLUME</span><span class="language-bash"> /tmp2</span>
+
+<span class="hljs-comment"># 将jar包添加到容器中，并命名为 springboot_docker.jar</span>
+<span class="hljs-keyword">ADD</span><span class="language-bash"> micr-task-0.0.1-SNAPSHOT.jar /micr-task-0.0.1-SNAPSHOT.jar</span>
+<span class="hljs-comment"># 运行jar包</span>
+<span class="hljs-keyword">RUN</span><span class="language-bash"> bash -c <span class="hljs-string">&#x27;touch micr-task-0.0.1-SNAPSHOT.jar&#x27;</span></span>
+<span class="hljs-keyword">ENTRYPOINT</span><span class="language-bash"> [<span class="hljs-string">&quot;java&quot;</span>, <span class="hljs-string">&quot;-jar&quot;</span>, <span class="hljs-string">&quot;/micr-task-0.0.1-SNAPSHOT.jar&quot;</span>]</span>
+
+<span class="hljs-comment"># SpringBoot项目配置的端口号为8080，需要将8080暴露出去</span>
+<span class="hljs-keyword">EXPOSE</span> <span class="hljs-number">8087</span>
+
+<span class="hljs-keyword">FROM</span> java:<span class="hljs-number">8</span>
+<span class="hljs-keyword">MAINTAINER</span> hcj
+
+<span class="hljs-comment"># 在主机 /var/lib/docker目录下创建一个临时文件，并链接到容器的 /tmp</span>
+<span class="hljs-keyword">VOLUME</span><span class="language-bash"> /tmp2</span>
+
+<span class="hljs-comment"># 将jar包添加到容器中，并命名为 springboot_docker.jar</span>
+<span class="hljs-keyword">ADD</span><span class="language-bash"> micr-pay-0.0.1-SNAPSHOT.jar micr-pay-0.0.1-SNAPSHOT.jar</span>
+<span class="hljs-comment"># 运行jar包</span>
+<span class="hljs-keyword">RUN</span><span class="language-bash"> bash -c <span class="hljs-string">&#x27;touch micr-pay-0.0.1-SNAPSHOT.jar&#x27;</span></span>
+<span class="hljs-keyword">ENTRYPOINT</span><span class="language-bash"> [<span class="hljs-string">&quot;java&quot;</span>, <span class="hljs-string">&quot;-jar&quot;</span>, <span class="hljs-string">&quot;/micr-pay-0.0.1-SNAPSHOT.jar&quot;</span>]</span>
+
+<span class="hljs-comment"># SpringBoot项目配置的端口号为8080，需要将8080暴露出去</span>
+<span class="hljs-keyword">EXPOSE</span> <span class="hljs-number">9000</span>
+
+</code></pre>
+
+<ol start="4">
+<li>运行docker容器</li>
+</ol>
+<pre><code class="hljs shell">docker build -t hcj_yinglibao:1.3 .</code></pre>
+
+
+
+<ol start="5">
+<li>如果语法检查没有任何问题，进行创建、启动：</li>
+</ol>
+<pre><code class="hljs shell">docker compose up -d</code></pre>
+
+
+
+
+
+<h3 id="Docker轻量级可视化工具Portainer"><a href="#Docker轻量级可视化工具Portainer" class="headerlink" title="Docker轻量级可视化工具Portainer"></a>Docker轻量级可视化工具Portainer</h3><p>一款轻量级的应用，提供了图形化界面，用于方便的管理Docker环境，包括单机环境和集群环境</p>
+<blockquote>
+<p>Portainer分为开源社区版（CE版）和商用版（BE版&#x2F;EE版）。</p>
+</blockquote>
+<pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">旧版镜像地址为portainer/portainer，从2022年1月标记为过期</span>
+<span class="hljs-meta prompt_"># </span><span class="language-bash">新版镜像地址为portainer/portainer-ce</span>
+<span class="hljs-meta prompt_"></span>
+<span class="hljs-meta prompt_"># </span><span class="language-bash">--restart=always 如果Docker引擎重启了，那么这个容器实例也会在Docker引擎重启后重启，类似开机自启</span>
+docker run -d -p 8000:8000 -p 9000:9000 --name portainer --restart=always -v/var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer-ce</code></pre>
+
+<p>启动之后，便可以在浏览器中进行访问：<a target="_blank" rel="noopener" href="http://192.168.70.138:9000/">http://192.168.70.138:9000</a></p>
+<p>首次进来时，需要创建 admin 的用户名（默认<code>admin</code>）、密码（必须满足校验规则，例如<code>portainer.io123</code>）。</p>
+<p>选择 <code>local</code>管理本地docker，即可看到本地Docker的详细信息，包括其中的镜像（images）、容器（containers）、网络（networks）、容器卷（volumes）、compose编排（stacks）等等。</p>
+<h3 id="Docker容器监控之-CAdvisor-InfluxDB-Granfana"><a href="#Docker容器监控之-CAdvisor-InfluxDB-Granfana" class="headerlink" title="Docker容器监控之 CAdvisor+InfluxDB+Granfana"></a>Docker容器监控之 CAdvisor+InfluxDB+Granfana</h3><p>简称CIG</p>
+<p>通过docker stats命令可以很方便的看到当前宿主机上所有容器的CPU，内存以及网络流量等数据，。<br>但是，docker stats统计结果只能是当前宿主机的全部容器，数据资料是实时的没有地方存储、没有健康指标过线预警等功能</p>
+<p>CAdvisor（监控收集） + InfluxDB（存储数据） + Granfana（展示图表），合称 <code>CIG</code>。</p>
+<img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
+  class="img-loading" data-original="image\Snipaste_2023-11-08_15-40-59.png"" style="zoom:50%;" />
+
+<h4 id="CAdvisor"><a href="#CAdvisor" class="headerlink" title="CAdvisor"></a>CAdvisor</h4><p>CAdvisor是一个容器资源监控工具，包括容器的内存、CPU、网络IO、磁盘IO等监控，同时提供了一个Web页面用于查看容器的实时运行状态。</p>
+<p>CAdvisor默认存储2分钟的数据，而且只是针对单物理机。不过CAdvisor提供了很多数据集成接口，支持 InfluxDB、Redis、Kafka、Elasticsearch等集成，可以加上对应配置将监控数据发往这些数据库存储起来。</p>
+<p>CAdvisor主要功能：</p>
+<ul>
+<li><p>展示Host和容器两个层次的监控数据</p>
+</li>
+<li><p>展示历史变化数据</p>
+</li>
+</ul>
+<h4 id="InfluxDB"><a href="#InfluxDB" class="headerlink" title="InfluxDB"></a>InfluxDB</h4><p>InfluxDB是用Go语言编写的一个开源分布式时序、事件和指标数据库，无需外部依赖。</p>
+<p>CAdvisor默认只在本机保存2分钟的数据，为了持久化存储数据和统一收集展示监控数据，需要将数据存储到InfluxDB中。InfluxDB是一个时序数据库，专门用于存储时序相关数据，很适合存储 CAdvisor 的数据。而且 CAdvisor本身已经提供了InfluxDB的集成方法，在启动容器时指定配置即可。</p>
+<p><strong>InfluxDB主要功能：</strong></p>
+<ul>
+<li><p>基于时间序列，支持与时间有关的相关函数（如最大、最小、求和等）</p>
+</li>
+<li><p>可度量性，可以实时对大量数据进行计算</p>
+</li>
+<li><p>基于事件，支持任意的事件数据</p>
+</li>
+</ul>
+<h4 id="Granfana"><a href="#Granfana" class="headerlink" title="Granfana"></a>Granfana</h4><p>Grafana是一个开源的数据监控分析可视化平台，支持多种数据源配置（支持的数据源包括InfluxDB、MySQL、Elasticsearch、OpenTSDB、Graphite等）和丰富的插件及模板功能，支持图表权限控制和报警。</p>
+<p>Granfana主要功能：</p>
+<ul>
+<li><p>灵活丰富的图形化选项</p>
+</li>
+<li><p>可以混合多种风格</p>
+</li>
+<li><p>支持白天和夜间模式</p>
+</li>
+<li><p>多个数据源</p>
+</li>
+</ul>
+<ol>
+<li>安装部署</li>
+</ol>
+<pre><code class="hljs yaml"><span class="hljs-attr">version:</span> <span class="hljs-string">&#x27;3.1&#x27;</span>
+
+<span class="hljs-attr">volumes:</span>
+  <span class="hljs-attr">grafana_data:</span> &#123;&#125;
+
+<span class="hljs-attr">services:</span>
+  <span class="hljs-attr">influxdb:</span>
+	<span class="hljs-comment"># tutum/influxdb 相比influxdb多了web可视化视图。但是该镜像已被标记为已过时</span>
+    <span class="hljs-attr">image:</span> <span class="hljs-string">tutum/influxdb:0.9</span>
+    <span class="hljs-attr">restart:</span> <span class="hljs-string">always</span>
+    <span class="hljs-attr">environment:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">PRE_CREATE_DB=cadvisor</span>
+    <span class="hljs-attr">ports:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">&quot;8083:8083&quot;</span>         <span class="hljs-comment"># 数据库web可视化页面端口</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">&quot;8086:8086&quot;</span>         <span class="hljs-comment"># 数据库端口</span>
+    <span class="hljs-attr">volumes:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">./data/influxdb:/data</span>
+
+  <span class="hljs-attr">cadvisor:</span>
+    <span class="hljs-attr">image:</span> <span class="hljs-string">google/cadvisor:v0.32.0</span>
+    <span class="hljs-attr">links:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">influxdb:influxsrv</span>
+    <span class="hljs-attr">command:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">-storage_driver=influxdb</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">-storage_driver_db=cadvisor</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">-storage_driver_host=influxsrv:8086</span>
+    <span class="hljs-attr">restart:</span> <span class="hljs-string">always</span>
+    <span class="hljs-attr">ports:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">&quot;8080:8080&quot;</span>
+    <span class="hljs-attr">volumes:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">/:/rootfs:ro</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">/var/run:/var/run:rw</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">/sys:/sys:ro</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">/var/lib/docker/:/var/lib/docker:ro</span>
+
+  <span class="hljs-attr">grafana:</span>
+    <span class="hljs-attr">image:</span> <span class="hljs-string">grafana/grafana:8.5.2</span>
+    <span class="hljs-attr">user:</span> <span class="hljs-string">&#x27;104&#x27;</span>
+    <span class="hljs-attr">restart:</span> <span class="hljs-string">always</span>
+    <span class="hljs-attr">links:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">influxdb:influxsrv</span>
+    <span class="hljs-attr">ports:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">&quot;3000:3000&quot;</span>
+    <span class="hljs-attr">volumes:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">grafana_data:/var/lib/grafana</span>
+    <span class="hljs-attr">environment:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">HTTP_USER=admin</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">HTTP_PASS=admin</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">INFLUXDB_HOST=influxsrv</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">INFLUXDB_PORT=8086</span></code></pre>
+
+<ol start="2">
+<li>检查语法</li>
+</ol>
+<pre><code class="hljs shell">docker compose config -q</code></pre>
+
+<ol start="3">
+<li>执行yml</li>
+</ol>
+<pre><code class="hljs shell">docker compose up -d</code></pre>
+
+
+
+
+
+
+
+</div></article><div class="copyright-wrapper"><p>原文作者:<a href="http://example.com">hcj</a></p><p>原文链接:<a href="http://example.com/2022/11/25/Docker%E9%AB%98%E9%98%B6%E7%AF%87/">Docker-高阶</a></p><p>发表日期: 2022-11-25 13:20:24</p><p>更新日期: 2024-03-15 21:43:51</p><p>版权声明: 本文采用<a rel="license noopener" target="_blank" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p></div><div class="post-pager"><div class="prev"><a href="/2023/03/12/1.JVM%E7%B3%BB%E5%88%97-JVM%E4%B8%8EJava%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84/" title="1.JVM系列-JVM与Java体系结构">上一篇 1.JVM系列-JVM与Java体系结构</a></div><div class="next"> <a href="/2022/11/15/Docker/" title="Docker">下一篇 Docker</a></div></div></section></section></main><footer class="footer-page"><div><span>Powered by</span><a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a><span>| Theme</span><a target="_blank" rel="noopener" href="https://github.com/techmovie/hexo-theme-instapaper">instapaper</a></div></footer><script src="/scripts/dark.js"></script><script src="/scripts/post.js"></script></body></html>

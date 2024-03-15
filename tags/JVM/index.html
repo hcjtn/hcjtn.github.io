@@ -1,0 +1,36 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible"><meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1,user-scalable=no"><meta name="renderer" content="webkit"><meta name="color-scheme" content="dark light"><meta name="author" content="hcj"><meta name="description" content=""><meta name="keywords" content=""><title>ArcLength</title><link rel="icon" type="image/x-icon" href="/images/favicon.ico"><link rel="stylesheet" href="//at.alicdn.com/t/font_3242539_utq6ykfq7z.css"><link rel="stylesheet" light-src="https://cdn.staticfile.org/highlight.js/11.5.0/styles/github.min.css" dark-src="https://cdn.staticfile.org/highlight.js/11.5.0/styles/github-dark.min.css"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Serif" as="font"><link href="/style/index.css" rel="stylesheet"><meta name="generator" content="Hexo 7.1.1"><link rel="alternate" href="/atom.xml" title="ArcLength" type="application/atom+xml">
+</head><body><header class="page-header"><nav><ul class="router-list"><li class="nav-item"> <a href="/">主页</a></li><li class="nav-item"> <a href="/archives/">归档</a></li><li class="nav-item"> <a href="/atom.xml">RSS</a></li></ul><div class="mode-switch"><span class="iconfont icon-DarkTheme"></span></div></nav><ul class="social-list"><li class="social-item"><a target="_blank" rel="noopener" href="https://t.me/hcjtn"><span class="iconfont icon-telegram"></span></a></li><li class="social-item"><a target="_blank" rel="noopener" href="https://github.com/hcjtn"><span class="iconfont icon-github"></span></a></li><li class="social-item"><a href="mailto:hu1466643375@qq.com"><span class="iconfont icon-mail"></span></a></li></ul></header><main><section class="main-content"><div class="tag-list"><h2>#JVM</h2><ul class="article-list"><li class="article-list-item"><div><a class="article-title" href="/2023/05/30/JVM%E6%8C%87%E4%BB%A4%E6%89%8B%E5%86%8C/" title="JVM指令手册">JVM指令手册</a></div><div class="article-preview">JVM指令手册一、栈和局部变量操作将常量压入栈的指令aconst_null 将null对象引用压入栈iconst_m1 将int类型常量-1压入栈iconst_0 将int类型常量0压入栈ico...</div><div class="article-time">2023-05-30</div></li><li class="article-list-item"><div><a class="article-title" href="/2023/05/10/JVM%E7%B3%BB%E5%88%97-%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%99%A8/" title="12.JVM系列-垃圾回收器">12.JVM系列-垃圾回收器</a></div><div class="article-preview">垃圾回收器GC 分类与性能指标垃圾回收器概述
+垃圾收集器没有在规范中进行过多的规定，可以由不同的厂商、不同版本的JVM来实现。
+
+由于JDK的版本处于高速迭代过程中，因此Java发展至今已经衍生...</div><div class="article-time">2023-05-10</div></li><li class="article-list-item"><div><a class="article-title" href="/2023/04/25/11-JVM%E7%B3%BB%E5%88%97-%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5/" title="11.JVM系列-垃圾回收相关概念">11.JVM系列-垃圾回收相关概念</a></div><div class="article-preview">垃圾回收相关概念System.gc() 的理解
+在默认情况下，通过System.gc()者Runtime.getRuntime().gc() 的调用，会显式触发Full GC，同时对老年代和新生...</div><div class="article-time">2023-04-25</div></li><li class="article-list-item"><div><a class="article-title" href="/2023/04/21/10-JVM%E7%B3%BB%E5%88%97-%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%A6%82%E8%BF%B0%E5%92%8C%E7%9B%B8%E5%85%B3%E7%AE%97%E6%B3%95/" title="10.JVM系列-垃圾回收概述和相关算法">10.JVM系列-垃圾回收概述和相关算法</a></div><div class="article-preview">垃圾回收概述
+
+
+Java 和 C++语言的区别，就在于垃圾收集技术和内存动态分配上，C++语言没有垃圾收集技术，需要程序员手动的收集。
+
+垃圾收集，不是Java语言的伴生产物。早在1960年，...</div><div class="article-time">2023-04-21</div></li><li class="article-list-item"><div><a class="article-title" href="/2023/04/16/9-JVM%E7%B3%BB%E5%88%97-StringTable/" title="9.JVM系列-StringTable">9.JVM系列-StringTable</a></div><div class="article-preview">StringTable（字符串常量池）String在new后 会创建两个对象 分别为new出来的对象和堆空间中字符串常量的对象，创建完成之后 String对象引用会指向堆空间中的对象地址，堆空间...</div><div class="article-time">2023-04-16</div></li><li class="article-list-item"><div><a class="article-title" href="/2023/04/09/8-JVM%E7%B3%BB%E5%88%97-%E6%89%A7%E8%A1%8C%E5%BC%95%E6%93%8E/" title="8.JVM系列-执行引擎">8.JVM系列-执行引擎</a></div><div class="article-preview">执行引擎执行引擎的作用是将二进制字节码编译成为本地机器呢能够执行的机器指令
+执行引擎概述
+
+执行引擎概述
+执行引擎是Java虚拟机核心的组成部分之一。
+“虚拟机”是一个相对于“物理机”的概念，这...</div><div class="article-time">2023-04-09</div></li><li class="article-list-item"><div><a class="article-title" href="/2023/04/04/7-JVM%E7%B3%BB%E5%88%97-%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%AE%9E%E4%BE%8B%E5%8C%96%E5%86%85%E5%AD%98%E5%B8%83%E5%B1%80%E4%B8%8E%E8%AE%BF%E9%97%AE%E5%AE%9A%E4%BD%8D/" title="7.JVM系列-对象的实例化内存布局与访问定位">7.JVM系列-对象的实例化内存布局与访问定位</a></div><div class="article-preview">对象的实例化内存布局与访问定位将运行时数据区里面的各个空间粘合在一起
+对象的实例化
+
+
+补充：
+
+new中分为三种
+最常见 new Object();
+变例：单例模式 Xxx的静态方法
+变例：工...</div><div class="article-time">2023-04-04</div></li><li class="article-list-item"><div><a class="article-title" href="/2023/03/31/6-JVM%E7%B3%BB%E5%88%97-%E6%96%B9%E6%B3%95%E5%8C%BA/" title="6.JVM系列-方法区">6.JVM系列-方法区</a></div><div class="article-preview">方法区栈、堆、方法区的交互关系从线程共享与否的角度来看
+ThreadLocal：如何保证多个线程在并发环境下的安全性？典型场景就是数据库连接管理，以及会话管理。
+
+
+栈、堆、方法区的交互关系
+下...</div><div class="article-time">2023-03-31</div></li><li class="article-list-item"><div><a class="article-title" href="/2023/03/25/5-JVM%E7%B3%BB%E5%88%97-%E5%A0%86/" title="5.JVM系列-堆">5.JVM系列-堆</a></div><div class="article-preview">堆
+HotSpot虚拟机上，所有的对象实例都是创建在堆上。
+
+堆的核心概述s0和s1满并不会触发GC回收器 当Eden区域满的事后就会自动将的from区的内容复制到to区去
+线程安全问题：我们可...</div><div class="article-time">2023-03-25</div></li><li class="article-list-item"><div><a class="article-title" href="/2023/03/21/4-JVM%E7%B3%BB%E5%88%97-%E8%99%9A%E6%8B%9F%E6%9C%BA%E6%A0%88/" title="4.JVM系列-虚拟机栈">4.JVM系列-虚拟机栈</a></div><div class="article-preview">虚拟机栈没有gc有oom
+简介虚拟机栈的出现背景
+由于跨平台性的设计，Java的指令都是根据栈来设计的。不同平台CPU架构不同，所以不能设计为基于寄存器的【如果设计成基于寄存器的，耦合度高，性能...</div><div class="article-time">2023-03-21</div></li></ul></div></section></main><footer class="footer-page"><div><span>Powered by</span><a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a><span>| Theme</span><a target="_blank" rel="noopener" href="https://github.com/techmovie/hexo-theme-instapaper">instapaper</a></div></footer><script src="/scripts/dark.js"></script></body></html>

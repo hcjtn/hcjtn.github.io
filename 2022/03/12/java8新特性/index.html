@@ -1,0 +1,1413 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible"><meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1,user-scalable=no"><meta name="renderer" content="webkit"><meta name="color-scheme" content="dark light"><meta name="author" content="hcj"><meta name="description" content=""><meta name="keywords" content=""><title>java8新特性</title><link rel="icon" type="image/x-icon" href="/images/favicon.ico"><link rel="stylesheet" href="//at.alicdn.com/t/font_3242539_utq6ykfq7z.css"><link rel="stylesheet" light-src="https://cdn.staticfile.org/highlight.js/11.5.0/styles/github.min.css" dark-src="https://cdn.staticfile.org/highlight.js/11.5.0/styles/github-dark.min.css"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Serif" as="font"><link href="/style/index.css" rel="stylesheet"><meta name="generator" content="Hexo 7.1.1"><link rel="alternate" href="/atom.xml" title="ArcLength" type="application/atom+xml">
+</head><body><header class="page-header"><nav><ul class="router-list"><li class="nav-item"> <a href="/">主页</a></li><li class="nav-item"> <a href="/archives/">归档</a></li><li class="nav-item"> <a href="/atom.xml">RSS</a></li></ul><div class="mode-switch"><span class="iconfont icon-DarkTheme"></span></div></nav></header><main><section class="main-content"><section class="post-page"><div class="title-bar"><h1>java8新特性</h1><div class="post-info"><span>2022-03-12 15:47:13</span><span class="tags"><a href="/tags/java/">#java</a></span></div></div><article> <div class="content"><h1 id="java8-新特性"><a href="#java8-新特性" class="headerlink" title="java8 新特性"></a>java8 新特性</h1><h3 id="Lambda表达式"><a href="#Lambda表达式" class="headerlink" title="Lambda表达式"></a>Lambda表达式</h3><pre><code class="hljs java"><span class="hljs-keyword">package</span> Lambda;
+
+<span class="hljs-comment">/**</span>
+<span class="hljs-comment"> * Created with IntelliJ IDEA.</span>
+<span class="hljs-comment"> *</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@author</span> : hcj</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@version</span> : 1.0</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@Project</span> : java8新特性</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@Package</span> : Lambda</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@ClassName</span> : Test2.java</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@createTime</span> : 2023/2/5 16:35</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@Description</span> : Lambda表达式的本质：作为函数式接口的实例 实现类   此接口是函数式接口</span>
+<span class="hljs-comment"> */</span>
+
+
+<span class="hljs-keyword">import</span> org.junit.Test;
+
+<span class="hljs-keyword">import</span> java.util.ArrayList;
+<span class="hljs-keyword">import</span> java.util.Comparator;
+<span class="hljs-keyword">import</span> java.util.function.Consumer;
+
+<span class="hljs-comment">/**</span>
+<span class="hljs-comment"> * Lambda表达式的使用</span>
+<span class="hljs-comment"> * &lt;p&gt;</span>
+<span class="hljs-comment"> * 1.举例： (o1,o2) -&gt; Integer.compare(o1,o2);</span>
+<span class="hljs-comment"> * 2.格式：</span>
+<span class="hljs-comment"> * -&gt; :lambda操作符 或 箭头操作符</span>
+<span class="hljs-comment"> * -&gt;左边：lambda形参列表 （其实就是接口中的抽象方法的形参列表）</span>
+<span class="hljs-comment"> * -&gt;右边：lambda体 （其实就是重写的抽象方法的方法体）</span>
+<span class="hljs-comment"> * &lt;p&gt;</span>
+<span class="hljs-comment"> * 3. Lambda表达式的使用：（分为6种情况介绍）</span>
+<span class="hljs-comment"> * &lt;p&gt;</span>
+<span class="hljs-comment"> * 总结：</span>
+<span class="hljs-comment"> * -&gt;左边：lambda形参列表的参数类型可以省略(类型推断)；如果lambda形参列表只有一个参数，其一对()也可以省略</span>
+<span class="hljs-comment"> * -&gt;右边：lambda体应该使用一对&#123;&#125;包裹；如果lambda体只有一条执行语句（可能是return语句），省略这一对&#123;&#125;和return关键字</span>
+<span class="hljs-comment"> * &lt;p&gt;</span>
+<span class="hljs-comment"> * 4.Lambda表达式的本质：作为函数式接口的实例 实现类</span>
+<span class="hljs-comment"> * &lt;p&gt;</span>
+<span class="hljs-comment"> * 5. 如果一个接口中，只声明了一个抽象方法，则此接口就称为函数式接口。我们可以在一个接口上使用 <span class="hljs-doctag">@FunctionalInterface</span> 注解，</span>
+<span class="hljs-comment"> * 这样做可以检查它是否是一个函数式接口。</span>
+<span class="hljs-comment"> * &lt;p&gt;</span>
+<span class="hljs-comment"> * 6. 所以以前用匿名实现类表示的现在都可以用Lambda表达式来写。</span>
+<span class="hljs-comment"> */</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Test2</span> &#123;
+    <span class="hljs-meta">@Test</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">test1</span><span class="hljs-params">()</span> &#123;
+        <span class="hljs-comment">//语法格式一：无参，无返回值</span>
+        <span class="hljs-type">Runnable</span> <span class="hljs-variable">runnable</span> <span class="hljs-operator">=</span> () -&gt; &#123;
+            System.out.println(<span class="hljs-string">&quot;123456789&quot;</span>);
+        &#125;;
+        runnable.run();
+    &#125;
+
+
+    <span class="hljs-comment">//语法格式二 有参 无返回值</span>
+    <span class="hljs-comment">//语法格式三：如果形参数据类型相同 数据类型可以省略，因为可由编译器推断得出，称为“类型推断”</span>
+    <span class="hljs-comment">//语法格式四：Lambda 若只需要一个参数时，参数的小括号可以省略</span>
+
+    <span class="hljs-comment">//语法格式六：当 Lambda 体只有一条语句时，return 与大括号若有，都可以省略    如果省略大括号 则 return 必须省略</span>
+    <span class="hljs-meta">@Test</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">test2</span><span class="hljs-params">()</span> &#123;
+
+        <span class="hljs-comment">//consumer是一个函数式接口（可以采用lambda写法），它的源码如下</span>
+        <span class="hljs-comment">/*</span>
+<span class="hljs-comment">        * @FunctionalInterface</span>
+<span class="hljs-comment">            public interface Consumer&lt;T&gt; &#123;</span>
+<span class="hljs-comment">             void accept(T t);</span>
+<span class="hljs-comment"></span>
+<span class="hljs-comment">              default Consumer&lt;T&gt; andThen(Consumer&lt;? super T&gt; after) &#123;</span>
+<span class="hljs-comment">                    Objects.requireNonNull(after);</span>
+<span class="hljs-comment">                    return (T t) -&gt; &#123; accept(t); after.accept(t); &#125;;</span>
+<span class="hljs-comment">            &#125;</span>
+<span class="hljs-comment">        &#125;</span>
+<span class="hljs-comment">*/</span>
+
+        
+        Consumer&lt;String&gt; consumer = s -&gt; System.out.println(s);
+        consumer.accept(<span class="hljs-string">&quot;谎言和誓言的区别是什么？\n 一个是听的人当真了 一个是说的人当真了&quot;</span>);
+        System.out.println(<span class="hljs-string">&quot;----语法格式6-----&quot;</span>);
+
+        Comparator&lt;Integer&gt; comparator = (o1, o2) -&gt; &#123;
+            <span class="hljs-keyword">return</span> o1.compareTo(o2);
+        &#125;;
+        System.out.println(comparator.compare(<span class="hljs-number">1</span>,<span class="hljs-number">2</span>));
+        System.out.println(<span class="hljs-string">&quot;*****************&quot;</span>);
+        Comparator&lt;Integer&gt; comparator2 = (o1, o2) -&gt; o1.compareTo(o2);
+        System.out.println(comparator2.compare(<span class="hljs-number">1</span>,<span class="hljs-number">2</span>));
+        
+    &#125;
+
+
+
+
+    <span class="hljs-comment">/**</span>
+<span class="hljs-comment">     * 类型推断</span>
+<span class="hljs-comment">     * 1. 泛型  ArrayList&lt;String&gt; arrayList = new ArrayList&lt;String&gt;(); 后面可以不用填写String</span>
+<span class="hljs-comment">     * 2. 数组创建 int[] arr = new int[] &#123;1,2,3&#125; 中 new int[] 可以省略</span>
+<span class="hljs-comment">     * 3. Consumer&lt;String&gt; consumer = (String s) -&gt; System.out.println(s); 中 String 可以省略</span>
+<span class="hljs-comment">     */</span>
+
+
+    <span class="hljs-comment">//语法格式五：Lambda 需要两个或以上的参数，多条执行语句，并且可以有返回值</span>
+    <span class="hljs-meta">@Test</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">test3</span><span class="hljs-params">()</span> &#123;
+        Comparator&lt;Integer&gt; comparator = (o1, o2) -&gt; &#123;
+            System.out.println(o1);
+            System.out.println(o2);
+            <span class="hljs-keyword">return</span> o1.compareTo(o2);
+        &#125;;
+        System.out.println(comparator.compare(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>));
+    &#125;
+
+
+&#125;
+
+</code></pre>
+
+
+
+
+
+<h3 id="函数式接口"><a href="#函数式接口" class="headerlink" title="函数式接口"></a>函数式接口</h3><p>函数式接口的实例就是Lambda表达式</p>
+<pre><code class="hljs java"><span class="hljs-keyword">package</span> Lambda;
+
+<span class="hljs-keyword">import</span> org.junit.Test;
+
+<span class="hljs-comment">/**</span>
+<span class="hljs-comment"> * Created with IntelliJ IDEA.</span>
+<span class="hljs-comment"> *</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@author</span> : hcj</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@version</span> : 1.0</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@Project</span> : java8新特性</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@Package</span> : Lambda</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@ClassName</span> : Test3.java</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@createTime</span> : 2023/2/5 17:32</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@Description</span> :</span>
+<span class="hljs-comment"> */</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Test3</span> &#123;
+    <span class="hljs-meta">@Test</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">test3</span><span class="hljs-params">()</span> &#123;
+        <span class="hljs-comment">// 近一步简化 Lambda 表达式</span>
+
+        Thread((String s) -&gt; &#123;
+            System.out.println(s);
+            System.out.println(<span class="hljs-string">&quot;山上一把火，所长爱上我&quot;</span>);
+        &#125;);
+
+        System.out.println(<span class="hljs-string">&quot;------------------------------------------------------&quot;</span>);
+        <span class="hljs-type">MyThread</span> <span class="hljs-variable">myThread</span> <span class="hljs-operator">=</span>  (String s) -&gt; &#123;
+            System.out.println(s);
+            System.out.println(<span class="hljs-string">&quot;山上一把火，所长爱上我&quot;</span>);
+        &#125;;
+        Thread(myThread);
+    &#125;
+    <span class="hljs-keyword">private</span>  <span class="hljs-keyword">void</span> <span class="hljs-title function_">Thread</span><span class="hljs-params">(MyThread mt)</span> &#123;
+        mt.run(<span class="hljs-string">&quot;放火&quot;</span>);
+
+    &#125;
+&#125;
+<span class="hljs-comment">/*放火</span>
+<span class="hljs-comment">山上一把火，所长爱上我</span>
+<span class="hljs-comment">*/</span>
+
+
+<span class="hljs-keyword">package</span> Lambda;
+
+<span class="hljs-comment">/**</span>
+<span class="hljs-comment"> * Created with IntelliJ IDEA.</span>
+<span class="hljs-comment"> *</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@author</span> : hcj</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@version</span> : 1.0</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@Project</span> : java8新特性</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@Package</span> : Lambda</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@ClassName</span> : MyThread.java</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@createTime</span> : 2023/2/5 17:34</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@Description</span> :</span>
+<span class="hljs-comment"> */</span>
+<span class="hljs-meta">@FunctionalInterface</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">MyThread</span> &#123;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">run</span><span class="hljs-params">(String s)</span>;
+
+&#125;</code></pre>
+
+
+
+<h4 id="java-内置四大核心函数式接口"><a href="#java-内置四大核心函数式接口" class="headerlink" title="java 内置四大核心函数式接口"></a>java 内置四大核心函数式接口</h4><pre><code class="hljs java"><span class="hljs-keyword">package</span> Lambda;
+
+<span class="hljs-keyword">import</span> org.junit.Test;
+
+<span class="hljs-keyword">import</span> java.util.ArrayList;
+<span class="hljs-keyword">import</span> java.util.Arrays;
+<span class="hljs-keyword">import</span> java.util.List;
+<span class="hljs-keyword">import</span> java.util.function.Consumer;
+<span class="hljs-keyword">import</span> java.util.function.Predicate;
+
+<span class="hljs-comment">/**</span>
+<span class="hljs-comment"> * Created with IntelliJ IDEA.</span>
+<span class="hljs-comment"> *</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@author</span> : hcj</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@version</span> : 1.0</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@Project</span> : java8新特性</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@Package</span> : Lambda</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@ClassName</span> : Test.java</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@createTime</span> : 2023/2/5 17:53</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@Description</span> :   java 内置四大核心函数式接口</span>
+<span class="hljs-comment"> * 消费型接口    Consumer&lt;T&gt;          void accept(T t)</span>
+<span class="hljs-comment"> * 供给型接口    Supplier&lt;T&gt;           T get()</span>
+<span class="hljs-comment"> * 函数型接口    Function&lt;T&gt;          R apply(T t)</span>
+<span class="hljs-comment"> * 断定型接口    Predicate&lt;T&gt;         Boolean test(T t)</span>
+<span class="hljs-comment"> */</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">TestInterface</span> &#123;
+
+    <span class="hljs-meta">@Test</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">test1</span><span class="hljs-params">()</span> &#123;
+
+        happyTime(<span class="hljs-number">500</span>, <span class="hljs-keyword">new</span> <span class="hljs-title class_">Consumer</span>&lt;Double&gt;() &#123;
+            <span class="hljs-meta">@Override</span>
+            <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">accept</span><span class="hljs-params">(Double aDouble)</span> &#123;
+                System.out.println(<span class="hljs-string">&quot;学习太累了，去天上人间买了瓶矿泉水，价格为：&quot;</span> + aDouble);
+            &#125;
+        &#125;);
+
+        System.out.println(<span class="hljs-string">&quot;********************&quot;</span>);
+
+        happyTime(<span class="hljs-number">400</span>, money -&gt; System.out.println(<span class="hljs-string">&quot;学习太累了，去天上人间喝了口水，价格为：&quot;</span> + money));
+    &#125;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">happyTime</span><span class="hljs-params">(<span class="hljs-type">double</span> money, Consumer&lt;Double&gt; con)</span> &#123;
+        con.accept(money);
+    &#125;
+
+
+    <span class="hljs-meta">@Test</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">test2</span><span class="hljs-params">()</span> &#123;
+        List&lt;String&gt; list = Arrays.asList(<span class="hljs-string">&quot;北京&quot;</span>, <span class="hljs-string">&quot;南京&quot;</span>, <span class="hljs-string">&quot;天津&quot;</span>, <span class="hljs-string">&quot;东京&quot;</span>, <span class="hljs-string">&quot;西京&quot;</span>, <span class="hljs-string">&quot;普京&quot;</span>);
+
+        List&lt;String&gt; filterStrs = filterString(list, <span class="hljs-keyword">new</span> <span class="hljs-title class_">Predicate</span>&lt;String&gt;() &#123;
+            <span class="hljs-meta">@Override</span>
+            <span class="hljs-keyword">public</span> <span class="hljs-type">boolean</span> <span class="hljs-title function_">test</span><span class="hljs-params">(String s)</span> &#123;
+                <span class="hljs-keyword">return</span> s.contains(<span class="hljs-string">&quot;京&quot;</span>);
+            &#125;
+        &#125;);
+
+        System.out.println(filterStrs);
+
+
+        List&lt;String&gt; filterStrs1 = filterString(list, s -&gt; s.contains(<span class="hljs-string">&quot;京&quot;</span>));
+        System.out.println(filterStrs1);
+    &#125;
+
+    <span class="hljs-comment">//根据给定的规则，过滤集合中的字符串。此规则由Predicate的方法决定</span>
+    <span class="hljs-keyword">public</span> List&lt;String&gt; <span class="hljs-title function_">filterString</span><span class="hljs-params">(List&lt;String&gt; list, Predicate&lt;String&gt; pre)</span> &#123;
+
+        ArrayList&lt;String&gt; filterList = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayList</span>&lt;&gt;();
+
+        <span class="hljs-keyword">for</span> (String s : list) &#123;
+            <span class="hljs-keyword">if</span> (pre.test(s)) &#123;
+                filterList.add(s);
+            &#125;
+        &#125;
+
+        <span class="hljs-keyword">return</span> filterList;
+
+    &#125;
+
+
+&#125;
+</code></pre>
+
+
+
+
+
+<h3 id="方法引用和构造器引用"><a href="#方法引用和构造器引用" class="headerlink" title="方法引用和构造器引用"></a>方法引用和构造器引用</h3><p>方法引用就是Lambda表达式（特殊的）</p>
+<p>当参数 返回值都一样，源代码中指针不停切换，最终执行的就是实际实现的方法，把外表那些繁琐的不直接的都去掉，直指本质，就是方法引用了。前提是没有其他操作，真的只用了一条调用语句</p>
+<pre><code class="hljs java"><span class="hljs-keyword">package</span> Lambda;
+
+<span class="hljs-comment">/**</span>
+<span class="hljs-comment"> * Created with IntelliJ IDEA.</span>
+<span class="hljs-comment"> *</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@author</span> : hcj</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@version</span> : 1.0</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@Project</span> : java8新特性</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@Package</span> : Lambda</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@ClassName</span> : MethodRefTest.java</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@createTime</span> : 2023/2/5 18:24</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@Description</span> :</span>
+<span class="hljs-comment"> */</span>
+
+
+<span class="hljs-keyword">import</span> org.junit.Test;
+
+<span class="hljs-keyword">import</span> java.io.PrintStream;
+<span class="hljs-keyword">import</span> java.util.Comparator;
+<span class="hljs-keyword">import</span> java.util.function.BiPredicate;
+<span class="hljs-keyword">import</span> java.util.function.Consumer;
+<span class="hljs-keyword">import</span> java.util.function.Function;
+<span class="hljs-keyword">import</span> java.util.function.Supplier;
+
+<span class="hljs-comment">/**</span>
+<span class="hljs-comment"> * 方法引用的使用</span>
+<span class="hljs-comment"> *</span>
+<span class="hljs-comment"> * 1.使用情境：当要传递给Lambda体的操作，已经有实现的方法了，可以使用方法引用！</span>
+<span class="hljs-comment"> *</span>
+<span class="hljs-comment"> * 2.方法引用，本质上就是Lambda表达式，而Lambda表达式作为函数式接口的实例。所以</span>
+<span class="hljs-comment"> *   方法引用，也是函数式接口的实例。</span>
+<span class="hljs-comment"> *</span>
+<span class="hljs-comment"> * 3. 使用格式：  类(或对象) :: 方法名</span>
+<span class="hljs-comment"> *</span>
+<span class="hljs-comment"> * 4. 具体分为如下的三种情况：</span>
+<span class="hljs-comment"> *    情况1     对象 :: 非静态方法</span>
+<span class="hljs-comment"> *    情况2     类 :: 静态方法</span>
+<span class="hljs-comment"> *</span>
+<span class="hljs-comment"> *    情况3     类 :: 非静态方法</span>
+<span class="hljs-comment"> *</span>
+<span class="hljs-comment"> * 5. 方法引用使用的要求：要求接口中的抽象方法的形参列表和返回值类型与方法引用的方法的</span>
+<span class="hljs-comment"> *    形参列表和返回值类型相同！（针对于情况1和情况2）</span>
+<span class="hljs-comment"> */</span>
+
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">MethodRefTest</span> &#123;
+
+    <span class="hljs-comment">// 情况一：对象 :: 实例方法</span>
+    <span class="hljs-comment">//Consumer中的void accept(T t)</span>
+    <span class="hljs-comment">//PrintStream中的void println(T t)</span>
+    <span class="hljs-meta">@Test</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">test1</span><span class="hljs-params">()</span> &#123;
+        Consumer&lt;String&gt; con1 = str -&gt; System.out.println(str);
+        con1.accept(<span class="hljs-string">&quot;北京&quot;</span>);
+
+        System.out.println(<span class="hljs-string">&quot;*******************&quot;</span>);
+        <span class="hljs-type">PrintStream</span> <span class="hljs-variable">ps</span> <span class="hljs-operator">=</span> System.out;
+        Consumer&lt;String&gt; con2 = ps::println;
+        con2.accept(<span class="hljs-string">&quot;beijing&quot;</span>);
+    &#125;
+
+    <span class="hljs-comment">//Supplier中的T get()</span>
+    <span class="hljs-comment">//Employee中的String getName()</span>
+    <span class="hljs-meta">@Test</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">test2</span><span class="hljs-params">()</span> &#123;
+        <span class="hljs-type">Employee</span> <span class="hljs-variable">emp</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Employee</span>(<span class="hljs-number">1001</span>,<span class="hljs-string">&quot;Tom&quot;</span>,<span class="hljs-number">23</span>,<span class="hljs-number">5600</span>);
+
+        Supplier&lt;String&gt; sup1 = () -&gt; emp.getName();
+        System.out.println(sup1.get());
+
+        System.out.println(<span class="hljs-string">&quot;*******************&quot;</span>);
+        Supplier&lt;String&gt; sup2 = emp::getName;
+        System.out.println(sup2.get());
+
+    &#125;
+
+    <span class="hljs-comment">// 情况二：类 :: 静态方法</span>
+    <span class="hljs-comment">//Comparator中的int compare(T t1,T t2)</span>
+    <span class="hljs-comment">//Integer中的int compare(T t1,T t2)</span>
+    <span class="hljs-meta">@Test</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">test3</span><span class="hljs-params">()</span> &#123;
+        Comparator&lt;Integer&gt; com1 = (t1, t2) -&gt; Integer.compare(t1,t2);
+        System.out.println(com1.compare(<span class="hljs-number">12</span>,<span class="hljs-number">21</span>));
+
+        System.out.println(<span class="hljs-string">&quot;*******************&quot;</span>);
+
+        Comparator&lt;Integer&gt; com2 = Integer::compare;
+        System.out.println(com2.compare(<span class="hljs-number">12</span>,<span class="hljs-number">3</span>));
+
+    &#125;
+
+    <span class="hljs-comment">//Function中的R apply(T t)</span>
+    <span class="hljs-comment">//Math中的Long round(Double d)</span>
+    <span class="hljs-meta">@Test</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">test4</span><span class="hljs-params">()</span> &#123;
+        Function&lt;Double,Long&gt; func = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Function</span>&lt;Double, Long&gt;() &#123;
+            <span class="hljs-meta">@Override</span>
+            <span class="hljs-keyword">public</span> Long <span class="hljs-title function_">apply</span><span class="hljs-params">(Double d)</span> &#123;
+                <span class="hljs-keyword">return</span> Math.round(d);
+            &#125;
+        &#125;;
+
+        System.out.println(<span class="hljs-string">&quot;*******************&quot;</span>);
+
+        Function&lt;Double,Long&gt; func1 = d -&gt; Math.round(d);
+        System.out.println(func1.apply(<span class="hljs-number">12.3</span>));
+
+        System.out.println(<span class="hljs-string">&quot;*******************&quot;</span>);
+
+        Function&lt;Double,Long&gt; func2 = Math::round;
+        System.out.println(func2.apply(<span class="hljs-number">12.6</span>));
+    &#125;
+
+    <span class="hljs-comment">// 情况三：类 :: 实例方法  (有难度)</span>
+    <span class="hljs-comment">// Comparator中的int comapre(T t1,T t2)</span>
+    <span class="hljs-comment">// String中的int t1.compareTo(t2)</span>
+    <span class="hljs-meta">@Test</span> 
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">test5</span><span class="hljs-params">()</span> &#123;
+        Comparator&lt;String&gt; com1 = (s1,s2) -&gt; s1.compareTo(s2);
+        System.out.println(com1.compare(<span class="hljs-string">&quot;abc&quot;</span>,<span class="hljs-string">&quot;abd&quot;</span>));
+
+        System.out.println(<span class="hljs-string">&quot;*******************&quot;</span>);
+
+        Comparator&lt;String&gt; com2 = String :: compareTo;
+        System.out.println(com2.compare(<span class="hljs-string">&quot;abd&quot;</span>,<span class="hljs-string">&quot;abm&quot;</span>));
+    &#125;
+
+    <span class="hljs-comment">//BiPredicate中的boolean test(T t1, T t2);</span>
+    <span class="hljs-comment">//String中的boolean t1.equals(t2)</span>
+    <span class="hljs-meta">@Test</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">test6</span><span class="hljs-params">()</span> &#123;
+        BiPredicate&lt;String,String&gt; pre1 = (s1,s2) -&gt; s1.equals(s2);
+        System.out.println(pre1.test(<span class="hljs-string">&quot;abc&quot;</span>,<span class="hljs-string">&quot;abc&quot;</span>));
+
+        System.out.println(<span class="hljs-string">&quot;*******************&quot;</span>);
+        BiPredicate&lt;String,String&gt; pre2 = String :: equals;
+        System.out.println(pre2.test(<span class="hljs-string">&quot;abc&quot;</span>,<span class="hljs-string">&quot;abd&quot;</span>));
+    &#125;
+
+    <span class="hljs-comment">// Function中的R apply(T t)</span>
+    <span class="hljs-comment">// Employee中的String getName();</span>
+    <span class="hljs-meta">@Test</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">test7</span><span class="hljs-params">()</span> &#123;
+        <span class="hljs-type">Employee</span> <span class="hljs-variable">employee</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Employee</span>(<span class="hljs-number">1001</span>, <span class="hljs-string">&quot;Jerry&quot;</span>, <span class="hljs-number">23</span>, <span class="hljs-number">6000</span>);
+
+
+        Function&lt;Employee,String&gt; func1 = e -&gt; e.getName();
+        System.out.println(func1.apply(employee));
+
+        System.out.println(<span class="hljs-string">&quot;*******************&quot;</span>);
+
+
+        Function&lt;Employee,String&gt; func2 = Employee::getName;
+        System.out.println(func2.apply(employee));
+
+
+    &#125;
+
+
+&#125;
+
+
+
+
+<span class="hljs-keyword">package</span> Lambda;
+
+<span class="hljs-comment">/**</span>
+<span class="hljs-comment"> * Created with IntelliJ IDEA.</span>
+<span class="hljs-comment"> *</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@author</span> : hcj</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@version</span> : 1.0</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@Project</span> : java8新特性</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@Package</span> : Lambda</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@ClassName</span> : Employee.java</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@createTime</span> : 2023/2/5 18:28</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@Description</span> :</span>
+<span class="hljs-comment"> */</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Employee</span> &#123;
+
+    <span class="hljs-keyword">private</span> <span class="hljs-type">int</span> id;
+    <span class="hljs-keyword">private</span> String name;
+    <span class="hljs-keyword">private</span> <span class="hljs-type">int</span> age;
+    <span class="hljs-keyword">private</span> <span class="hljs-type">double</span> salary;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-type">int</span> <span class="hljs-title function_">getId</span><span class="hljs-params">()</span> &#123;
+        <span class="hljs-keyword">return</span> id;
+    &#125;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">setId</span><span class="hljs-params">(<span class="hljs-type">int</span> id)</span> &#123;
+        <span class="hljs-built_in">this</span>.id = id;
+    &#125;
+
+    <span class="hljs-keyword">public</span> String <span class="hljs-title function_">getName</span><span class="hljs-params">()</span> &#123;
+        <span class="hljs-keyword">return</span> name;
+    &#125;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">setName</span><span class="hljs-params">(String name)</span> &#123;
+        <span class="hljs-built_in">this</span>.name = name;
+    &#125;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-type">int</span> <span class="hljs-title function_">getAge</span><span class="hljs-params">()</span> &#123;
+        <span class="hljs-keyword">return</span> age;
+    &#125;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">setAge</span><span class="hljs-params">(<span class="hljs-type">int</span> age)</span> &#123;
+        <span class="hljs-built_in">this</span>.age = age;
+    &#125;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-type">double</span> <span class="hljs-title function_">getSalary</span><span class="hljs-params">()</span> &#123;
+        <span class="hljs-keyword">return</span> salary;
+    &#125;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">setSalary</span><span class="hljs-params">(<span class="hljs-type">double</span> salary)</span> &#123;
+        <span class="hljs-built_in">this</span>.salary = salary;
+    &#125;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-title function_">Employee</span><span class="hljs-params">()</span> &#123;
+        System.out.println(<span class="hljs-string">&quot;Employee().....&quot;</span>);
+    &#125;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-title function_">Employee</span><span class="hljs-params">(<span class="hljs-type">int</span> id)</span> &#123;
+        <span class="hljs-built_in">this</span>.id = id;
+        System.out.println(<span class="hljs-string">&quot;Employee(int id).....&quot;</span>);
+    &#125;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-title function_">Employee</span><span class="hljs-params">(<span class="hljs-type">int</span> id, String name)</span> &#123;
+        <span class="hljs-built_in">this</span>.id = id;
+        <span class="hljs-built_in">this</span>.name = name;
+    &#125;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-title function_">Employee</span><span class="hljs-params">(<span class="hljs-type">int</span> id, String name, <span class="hljs-type">int</span> age, <span class="hljs-type">double</span> salary)</span> &#123;
+
+        <span class="hljs-built_in">this</span>.id = id;
+        <span class="hljs-built_in">this</span>.name = name;
+        <span class="hljs-built_in">this</span>.age = age;
+        <span class="hljs-built_in">this</span>.salary = salary;
+    &#125;
+
+    <span class="hljs-meta">@Override</span>
+    <span class="hljs-keyword">public</span> String <span class="hljs-title function_">toString</span><span class="hljs-params">()</span> &#123;
+        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;Employee&#123;&quot;</span> + <span class="hljs-string">&quot;id=&quot;</span> + id + <span class="hljs-string">&quot;, name=&#x27;&quot;</span> + name + <span class="hljs-string">&#x27;\&#x27;&#x27;</span> + <span class="hljs-string">&quot;, age=&quot;</span> + age + <span class="hljs-string">&quot;, salary=&quot;</span> + salary + <span class="hljs-string">&#x27;&#125;&#x27;</span>;
+    &#125;
+
+    <span class="hljs-meta">@Override</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-type">boolean</span> <span class="hljs-title function_">equals</span><span class="hljs-params">(Object o)</span> &#123;
+        <span class="hljs-keyword">if</span> (<span class="hljs-built_in">this</span> == o)
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+        <span class="hljs-keyword">if</span> (o == <span class="hljs-literal">null</span> || getClass() != o.getClass())
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+
+        <span class="hljs-type">Employee</span> <span class="hljs-variable">employee</span> <span class="hljs-operator">=</span> (Employee) o;
+
+        <span class="hljs-keyword">if</span> (id != employee.id)
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+        <span class="hljs-keyword">if</span> (age != employee.age)
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+        <span class="hljs-keyword">if</span> (Double.compare(employee.salary, salary) != <span class="hljs-number">0</span>)
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+        <span class="hljs-keyword">return</span> name != <span class="hljs-literal">null</span> ? name.equals(employee.name) : employee.name == <span class="hljs-literal">null</span>;
+    &#125;
+
+    <span class="hljs-meta">@Override</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-type">int</span> <span class="hljs-title function_">hashCode</span><span class="hljs-params">()</span> &#123;
+        <span class="hljs-type">int</span> result;
+        <span class="hljs-type">long</span> temp;
+        result = id;
+        result = <span class="hljs-number">31</span> * result + (name != <span class="hljs-literal">null</span> ? name.hashCode() : <span class="hljs-number">0</span>);
+        result = <span class="hljs-number">31</span> * result + age;
+        temp = Double.doubleToLongBits(salary);
+        result = <span class="hljs-number">31</span> * result + (<span class="hljs-type">int</span>) (temp ^ (temp &gt;&gt;&gt; <span class="hljs-number">32</span>));
+        <span class="hljs-keyword">return</span> result;
+    &#125;
+&#125;
+</code></pre>
+
+
+
+<h4 id="构造器引用与项目引用的使用"><a href="#构造器引用与项目引用的使用" class="headerlink" title="构造器引用与项目引用的使用"></a>构造器引用与项目引用的使用</h4><pre><code class="hljs java"><span class="hljs-keyword">package</span> Lambda;
+
+<span class="hljs-comment">/**</span>
+<span class="hljs-comment"> * Created with IntelliJ IDEA.</span>
+<span class="hljs-comment"> *</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@author</span> : hcj</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@version</span> : 1.0</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@Project</span> : java8新特性</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@Package</span> : Lambda</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@ClassName</span> : ConstructorRefTest.java</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@createTime</span> : 2023/2/5 18:31</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@Description</span> :</span>
+<span class="hljs-comment"> */</span>
+<span class="hljs-keyword">import</span> org.junit.Test;
+<span class="hljs-keyword">import</span> java.util.Arrays;
+<span class="hljs-keyword">import</span> java.util.function.BiFunction;
+<span class="hljs-keyword">import</span> java.util.function.Function;
+<span class="hljs-keyword">import</span> java.util.function.Supplier;
+
+<span class="hljs-comment">/**</span>
+<span class="hljs-comment"> * 一、构造器引用</span>
+<span class="hljs-comment"> *      和方法引用类似，函数式接口的抽象方法的形参列表和构造器的形参列表一致。</span>
+<span class="hljs-comment"> *      抽象方法的返回值类型即为构造器所属的类的类型</span>
+<span class="hljs-comment"> *</span>
+<span class="hljs-comment"> * 二、数组引用</span>
+<span class="hljs-comment"> *     大家可以把数组看做是一个特殊的类，则写法与构造器引用一致。</span>
+<span class="hljs-comment"> *</span>
+<span class="hljs-comment"> */</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">ConstructorRefTest</span> &#123;
+    <span class="hljs-comment">//构造器引用</span>
+    <span class="hljs-comment">//Supplier中的T get()</span>
+    <span class="hljs-comment">//Employee的空参构造器：Employee()</span>
+    <span class="hljs-meta">@Test</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">test1</span><span class="hljs-params">()</span>&#123;
+
+        Supplier&lt;Employee&gt; sup = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Supplier</span>&lt;Employee&gt;() &#123;
+            <span class="hljs-meta">@Override</span>
+            <span class="hljs-keyword">public</span> Employee <span class="hljs-title function_">get</span><span class="hljs-params">()</span> &#123;
+                <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Employee</span>();
+            &#125;
+        &#125;;
+        System.out.println(<span class="hljs-string">&quot;*******************&quot;</span>);
+
+        Supplier&lt;Employee&gt;  sup1 = () -&gt; <span class="hljs-keyword">new</span> <span class="hljs-title class_">Employee</span>();
+        System.out.println(sup1.get());
+
+        System.out.println(<span class="hljs-string">&quot;*******************&quot;</span>);
+
+        Supplier&lt;Employee&gt;  sup2 = Employee :: <span class="hljs-keyword">new</span>;
+        System.out.println(sup2.get());
+    &#125;
+
+    <span class="hljs-comment">//Function中的R apply(T t)</span>
+    <span class="hljs-meta">@Test</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">test2</span><span class="hljs-params">()</span>&#123;
+        <span class="hljs-type">Integer</span> <span class="hljs-variable">i</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span> ;
+        Function&lt;Integer,Employee&gt; f = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Function</span>&lt;Integer,Employee&gt;() &#123;
+            <span class="hljs-meta">@Override</span>
+            <span class="hljs-keyword">public</span> Employee <span class="hljs-title function_">apply</span><span class="hljs-params">(Integer integer)</span> &#123;
+                <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Employee</span>(integer);
+            &#125;
+        &#125;;
+        <span class="hljs-type">Employee</span> <span class="hljs-variable">e</span> <span class="hljs-operator">=</span> f.apply(<span class="hljs-number">123</span>);
+        System.out.println(e);
+        System.out.println(<span class="hljs-string">&quot;*********************&quot;</span>);
+
+
+        Function&lt;Integer,Employee&gt; func1 = id -&gt; <span class="hljs-keyword">new</span> <span class="hljs-title class_">Employee</span>(id);
+        <span class="hljs-type">Employee</span> <span class="hljs-variable">employee</span> <span class="hljs-operator">=</span> func1.apply(<span class="hljs-number">1001</span>);
+        System.out.println(employee);
+
+        System.out.println(<span class="hljs-string">&quot;*******************&quot;</span>);
+
+        Function&lt;Integer,Employee&gt; func2 = Employee :: <span class="hljs-keyword">new</span>;
+        <span class="hljs-type">Employee</span> <span class="hljs-variable">apply</span> <span class="hljs-operator">=</span> func2.apply(<span class="hljs-number">1002</span>);
+        System.out.println(apply);
+
+    &#125;
+
+    
+    
+  
+    <span class="hljs-comment">//BiFunction中的R apply(T t,U u)</span>
+    <span class="hljs-meta">@Test</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">test3</span><span class="hljs-params">()</span>&#123;
+        BiFunction&lt;Integer,String,Employee&gt; biFunction = <span class="hljs-keyword">new</span> <span class="hljs-title class_">BiFunction</span>&lt;Integer, String, Employee&gt;() &#123;
+
+            <span class="hljs-meta">@Override</span>
+            <span class="hljs-keyword">public</span> Employee <span class="hljs-title function_">apply</span><span class="hljs-params">(Integer integer, String s)</span> &#123;
+                <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Employee</span>(integer,s);
+            &#125;
+        &#125;;
+        System.out.println(biFunction.apply(<span class="hljs-number">661</span>,<span class="hljs-string">&quot;hcj&quot;</span>));
+
+
+        BiFunction&lt;Integer,String,Employee&gt; func1 = (id,name) -&gt; <span class="hljs-keyword">new</span> <span class="hljs-title class_">Employee</span>(id,name);
+        System.out.println(func1.apply(<span class="hljs-number">1001</span>,<span class="hljs-string">&quot;Tom&quot;</span>));
+
+        System.out.println(<span class="hljs-string">&quot;*******************&quot;</span>);
+
+        BiFunction&lt;Integer,String,Employee&gt; func2 = Employee :: <span class="hljs-keyword">new</span>;
+        System.out.println(func2.apply(<span class="hljs-number">1002</span>,<span class="hljs-string">&quot;Tom&quot;</span>));
+
+    &#125;
+
+    <span class="hljs-comment">//数组引用</span>
+    <span class="hljs-comment">//Function中的R apply(T t)</span>
+    <span class="hljs-meta">@Test</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">test4</span><span class="hljs-params">()</span>&#123;
+        Function&lt;Integer,String[]&gt; func1 = length -&gt; <span class="hljs-keyword">new</span> <span class="hljs-title class_">String</span>[length];
+        String[] arr1 = func1.apply(<span class="hljs-number">5</span>);
+        System.out.println(Arrays.toString(arr1));
+
+        System.out.println(<span class="hljs-string">&quot;*******************&quot;</span>);
+
+        Function&lt;Integer,String[]&gt; func2 = String[] :: <span class="hljs-keyword">new</span>;
+        String[] arr2 = func2.apply(<span class="hljs-number">10</span>);
+        System.out.println(Arrays.toString(arr2));
+
+    &#125;
+&#125;
+</code></pre>
+
+
+
+
+
+
+
+<h2 id="Stream-API说明"><a href="#Stream-API说明" class="headerlink" title="Stream API说明"></a>Stream API说明</h2><p>使用 Stream API说明对集合数据进行操作，就类似于使用SQL执行数据库查询</p>
+<p>集合讲的是数据   Stream讲的是计算</p>
+<p>注意：</p>
+<ul>
+<li><p>Stream 自己不会存储元素</p>
+</li>
+<li><p>Stream 不会改变源对象  他们会返回一个有结果的新Stream</p>
+</li>
+<li><p>Stream 操作是有延迟的  意味着他们会等到需要结果的时候才执行</p>
+</li>
+</ul>
+<h3 id="Stream实例化"><a href="#Stream实例化" class="headerlink" title="Stream实例化"></a>Stream实例化</h3><pre><code class="hljs java"><span class="hljs-keyword">package</span> Stream;
+
+<span class="hljs-comment">/**</span>
+<span class="hljs-comment"> * Created with IntelliJ IDEA.</span>
+<span class="hljs-comment"> *</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@author</span> : hcj</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@version</span> : 1.0</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@Project</span> : java8新特性</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@Package</span> : Stream</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@ClassName</span> : StreamTest.java</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@createTime</span> : 2023/2/6 11:00</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@Description</span> :</span>
+<span class="hljs-comment"> */</span>
+
+
+<span class="hljs-keyword">import</span> Lambda.Employee;
+<span class="hljs-keyword">import</span> org.junit.Test;
+
+<span class="hljs-keyword">import</span> java.util.Arrays;
+<span class="hljs-keyword">import</span> java.util.List;
+<span class="hljs-keyword">import</span> java.util.stream.IntStream;
+<span class="hljs-keyword">import</span> java.util.stream.Stream;
+
+<span class="hljs-comment">/**</span>
+<span class="hljs-comment"> * 1. Stream关注的是对数据的运算，与CPU打交道</span>
+<span class="hljs-comment"> *    集合关注的是数据的存储，与内存打交道</span>
+<span class="hljs-comment"> *</span>
+<span class="hljs-comment"> * 2.</span>
+<span class="hljs-comment"> * ①Stream 自己不会存储元素。</span>
+<span class="hljs-comment"> * ②Stream 不会改变源对象。相反，他们会返回一个持有结果的新Stream。</span>
+<span class="hljs-comment"> * ③Stream 操作是延迟执行的。这意味着他们会等到需要结果的时候才执行</span>
+<span class="hljs-comment"> *</span>
+<span class="hljs-comment"> * 3.Stream 执行流程</span>
+<span class="hljs-comment"> * ① Stream的实例化</span>
+<span class="hljs-comment"> * ② 一系列的中间操作（过滤、映射、...)</span>
+<span class="hljs-comment"> * ③ 终止操作</span>
+<span class="hljs-comment"> *</span>
+<span class="hljs-comment"> * 4.说明：</span>
+<span class="hljs-comment"> * 4.1 一个中间操作链，对数据源的数据进行处理</span>
+<span class="hljs-comment"> * 4.2 一旦执行终止操作，就执行中间操作链，并产生结果。之后，不会再被使用</span>
+<span class="hljs-comment"> *</span>
+<span class="hljs-comment"> *</span>
+<span class="hljs-comment"> *  测试Stream的实例化</span>
+<span class="hljs-comment"> */</span>
+
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">StreamTest</span> &#123;
+
+    <span class="hljs-comment">// 创建 Stream方式一    通过集合</span>
+    <span class="hljs-meta">@Test</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">test1</span><span class="hljs-params">()</span>&#123;
+        List&lt;Employee&gt; employees = EmployeeData.getEmployees();
+        Stream&lt;Employee&gt; stream = employees.stream();<span class="hljs-comment">//  顺序流</span>
+        Stream&lt;Employee&gt; employeeStream = employees.parallelStream();<span class="hljs-comment">// 并行流</span>
+    &#125;
+
+
+    <span class="hljs-comment">// 创建 Stream方式二    数组</span>
+    <span class="hljs-meta">@Test</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">test2</span><span class="hljs-params">()</span>&#123;
+        <span class="hljs-type">int</span>[] i= &#123;<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>, <span class="hljs-number">5</span>, <span class="hljs-number">6</span>&#125;;
+        <span class="hljs-type">IntStream</span> <span class="hljs-variable">intStream</span> <span class="hljs-operator">=</span> Arrays.stream(i);<span class="hljs-comment">//顺序流</span>
+    &#125;
+
+
+
+    <span class="hljs-comment">// 创建 Stream方式三     通过Stream的of()</span>
+    <span class="hljs-meta">@Test</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">test3</span><span class="hljs-params">()</span>&#123;
+        Stream&lt;String&gt; stringStream = Stream.of(<span class="hljs-string">&quot;恶龙咆哮&quot;</span>, <span class="hljs-string">&quot;恶wu~~~&quot;</span>);
+    &#125;
+
+    <span class="hljs-comment">// 创建 Stream方式四     创建无限流</span>
+    <span class="hljs-meta">@Test</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">test4</span><span class="hljs-params">()</span> &#123;
+        <span class="hljs-comment">//迭代</span>
+        <span class="hljs-comment">//public static&lt;T&gt; Stream&lt;T&gt; iterate(final T seed, final UnaryOperator&lt;T&gt; f)</span>
+        <span class="hljs-comment">// 遍历前十个偶数</span>
+        Stream.iterate(<span class="hljs-number">0</span>,t-&gt;t+<span class="hljs-number">2</span>).limit(<span class="hljs-number">10</span>).forEach(System.out::println);
+        <span class="hljs-comment">//      生成</span>
+        <span class="hljs-comment">//public static&lt;T&gt; Stream&lt;T&gt; generate(Supplier&lt;T&gt; s)</span>
+        Stream.generate(Math::random).limit(<span class="hljs-number">10</span>).forEach(System.out::println);
+    &#125;
+&#125;
+</code></pre>
+
+<h3 id="Stream中间操作"><a href="#Stream中间操作" class="headerlink" title="Stream中间操作"></a>Stream中间操作</h3><pre><code class="hljs java"><span class="hljs-keyword">package</span> Stream;
+
+<span class="hljs-keyword">import</span> Lambda.Employee;
+<span class="hljs-keyword">import</span> org.junit.Test;
+
+<span class="hljs-keyword">import</span> java.util.ArrayList;
+<span class="hljs-keyword">import</span> java.util.Arrays;
+<span class="hljs-keyword">import</span> java.util.List;
+<span class="hljs-keyword">import</span> java.util.stream.Stream;
+
+<span class="hljs-comment">/**</span>
+<span class="hljs-comment"> * Created with IntelliJ IDEA.</span>
+<span class="hljs-comment"> *</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@author</span> : hcj</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@version</span> : 1.0</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@Project</span> : java8新特性</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@Package</span> : Stream</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@ClassName</span> : StreamTest2.java</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@createTime</span> : 2023/2/6 11:25</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@Description</span> :</span>
+<span class="hljs-comment"> */</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">StreamTest2</span> &#123;
+
+    <span class="hljs-comment">//1-筛选与切片</span>
+    <span class="hljs-meta">@Test</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">test</span><span class="hljs-params">()</span> &#123;
+        List&lt;Employee&gt; employeeList = EmployeeData.getEmployees();
+        <span class="hljs-comment">//        filter(Predicate p)——接收 Lambda ， 从流中排除某些元素。</span>
+        Stream&lt;Employee&gt; stream = employeeList.stream();
+        stream.filter(e -&gt; e.getSalary() &gt; <span class="hljs-number">7000</span>).forEach(System.out::println);
+
+        System.out.println(<span class="hljs-string">&quot;--------------------------&quot;</span>);
+
+        <span class="hljs-comment">//        limit(n)——截断流，使其元素不超过给定数量。</span>
+        employeeList.stream().limit(<span class="hljs-number">3</span>).forEach(System.out::println);
+
+        System.out.println(<span class="hljs-string">&quot;---------------------------&quot;</span>);
+
+        <span class="hljs-comment">//        skip(n) —— 跳过元素，返回一个扔掉了前 n 个元素的流。若流中元素不足 n 个，则返回一个空流。与 limit(n) 互补</span>
+        employeeList.stream().skip(<span class="hljs-number">3</span>).forEach(System.out::println);
+
+        System.out.println(<span class="hljs-string">&quot;---------------------------&quot;</span>);
+
+        <span class="hljs-comment">//        distinct()——筛选，通过流所生成元素的 hashCode() 和 equals() 去除重复元素</span>
+
+        employeeList.add(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Employee</span>(<span class="hljs-number">1010</span>, <span class="hljs-string">&quot;刘强东&quot;</span>, <span class="hljs-number">40</span>, <span class="hljs-number">8000</span>));
+        employeeList.add(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Employee</span>(<span class="hljs-number">1010</span>, <span class="hljs-string">&quot;刘强东&quot;</span>, <span class="hljs-number">41</span>, <span class="hljs-number">8000</span>));
+        employeeList.add(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Employee</span>(<span class="hljs-number">1010</span>, <span class="hljs-string">&quot;刘强东&quot;</span>, <span class="hljs-number">40</span>, <span class="hljs-number">8000</span>));
+        employeeList.add(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Employee</span>(<span class="hljs-number">1010</span>, <span class="hljs-string">&quot;刘强东&quot;</span>, <span class="hljs-number">40</span>, <span class="hljs-number">8000</span>));
+        employeeList.add(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Employee</span>(<span class="hljs-number">1010</span>, <span class="hljs-string">&quot;刘强东&quot;</span>, <span class="hljs-number">40</span>, <span class="hljs-number">8000</span>));
+
+        System.out.println(<span class="hljs-string">&quot;---------------------------&quot;</span>);
+<span class="hljs-comment">//        System.out.println(list);</span>
+
+        <span class="hljs-comment">// distinct() stream流去重</span>
+        employeeList.stream().distinct().forEach(System.out::println);
+    &#125;
+
+    <span class="hljs-comment">//映射</span>
+    <span class="hljs-meta">@Test</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">test1</span><span class="hljs-params">()</span> &#123;
+        <span class="hljs-comment">/*map(Function f)——接收一个函数作为参数，将元素转换成其他形式或提取信息，该函数会被应用到每个元素上，并将其映射成一个新的元素。 相当于 list1.all*/</span>
+        List&lt;String&gt; list = Arrays.asList(<span class="hljs-string">&quot;aa&quot;</span>, <span class="hljs-string">&quot;bb&quot;</span>, <span class="hljs-string">&quot;cc&quot;</span>, <span class="hljs-string">&quot;dd&quot;</span>);
+        <span class="hljs-comment">//str.toUpperCase() 借用了  常用的函数式接口</span>
+        list.stream().map(str -&gt; str.toUpperCase()).forEach(System.out::println);
+        <span class="hljs-comment">// 练习1：获取员工姓名长度大于3的员工的姓名。</span>
+        List&lt;Employee&gt; employees = EmployeeData.getEmployees();
+        Stream&lt;String&gt; nameStream = employees.stream().map(e -&gt; e.getName());
+        <span class="hljs-comment">// Stream&lt;String&gt; nameStream = employees.stream().map(Employee::getName);</span>
+        nameStream.filter(s -&gt; s.length() &gt; <span class="hljs-number">3</span>).forEach(System.out::println);
+        System.out.println(<span class="hljs-string">&quot;--------------------------------------&quot;</span>);
+        <span class="hljs-comment">//练习2：</span>
+        Stream&lt;Stream&lt;Character&gt;&gt; streamStream = list.stream().map(StreamTest2::fromStringToStream);
+        streamStream.forEach(
+                s-&gt;&#123;
+                    s.forEach(System.out::println);
+                &#125;
+        );
+        System.out.println(<span class="hljs-string">&quot;--------------------------------------&quot;</span>);
+        Stream&lt;Character&gt; characterStream = list.stream().flatMap(StreamTest2::fromStringToStream);
+        characterStream.forEach(System.out::println);
+
+        <span class="hljs-comment">//flatMap(Function f)——接收一个函数作为参数，将流中的每个值都换成另一个流，然后把所有流连接成一个流。   相当于 list1.addAll</span>
+    &#125;
+
+    <span class="hljs-comment">//将字符串中的多个字符构成的集合转换为对应的Stream的实例</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> Stream&lt;Character&gt; <span class="hljs-title function_">fromStringToStream</span><span class="hljs-params">(String str)</span>&#123;<span class="hljs-comment">//aa</span>
+        ArrayList&lt;Character&gt; list = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayList</span>&lt;&gt;();
+        <span class="hljs-keyword">for</span>(Character c : str.toCharArray())&#123;
+            list.add(c);
+        &#125;
+        <span class="hljs-keyword">return</span> list.stream();
+
+    &#125;
+
+
+    <span class="hljs-meta">@Test</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">test2</span><span class="hljs-params">()</span> &#123;
+        <span class="hljs-type">ArrayList</span> <span class="hljs-variable">list1</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayList</span>();
+        list1.add(<span class="hljs-number">1</span>);
+        list1.add(<span class="hljs-number">2</span>);
+        list1.add(<span class="hljs-number">3</span>);
+        <span class="hljs-type">ArrayList</span> <span class="hljs-variable">list2</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayList</span>();
+        list2.add(<span class="hljs-number">4</span>);
+        list2.add(<span class="hljs-number">5</span>);
+        list2.add(<span class="hljs-number">6</span>);
+       <span class="hljs-comment">// list1.add(list2);</span>
+        list1.addAll(list2);
+        System.out.println(list1);
+
+
+
+    &#125;
+
+    <span class="hljs-comment">//3-排序</span>
+    <span class="hljs-meta">@Test</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">test4</span><span class="hljs-params">()</span>&#123;
+<span class="hljs-comment">//        sorted()——自然排序</span>
+        List&lt;Integer&gt; list = Arrays.asList(<span class="hljs-number">12</span>, <span class="hljs-number">43</span>, <span class="hljs-number">65</span>, <span class="hljs-number">34</span>, <span class="hljs-number">87</span>, <span class="hljs-number">0</span>, -<span class="hljs-number">98</span>, <span class="hljs-number">7</span>);
+        list.stream().sorted().forEach(System.out::println);
+        <span class="hljs-comment">//抛异常，原因:Employee没有实现Comparable接口</span>
+<span class="hljs-comment">//        List&lt;Employee&gt; employees = EmployeeData.getEmployees();</span>
+<span class="hljs-comment">//        employees.stream().sorted().forEach(System.out::println);</span>
+
+
+<span class="hljs-comment">//        sorted(Comparator com)——定制排序</span>
+
+        List&lt;Employee&gt; employees = EmployeeData.getEmployees();
+        employees.stream().sorted( (e1,e2) -&gt; &#123;
+
+            <span class="hljs-type">int</span> <span class="hljs-variable">ageValue</span> <span class="hljs-operator">=</span> Integer.compare(e1.getAge(),e2.getAge());
+            <span class="hljs-keyword">if</span>(ageValue != <span class="hljs-number">0</span>)&#123;
+                <span class="hljs-keyword">return</span> ageValue;
+            &#125;<span class="hljs-keyword">else</span>&#123;
+                <span class="hljs-keyword">return</span> -Double.compare(e1.getSalary(),e2.getSalary());
+            &#125;
+
+        &#125;).forEach(System.out::println);
+    &#125;
+
+
+
+&#125;
+</code></pre>
+
+
+
+
+
+<h3 id="Stream终止操作"><a href="#Stream终止操作" class="headerlink" title="Stream终止操作"></a>Stream终止操作</h3><pre><code class="hljs java"><span class="hljs-keyword">package</span> Stream;
+
+<span class="hljs-keyword">import</span> Lambda.Employee;
+<span class="hljs-keyword">import</span> org.junit.Test;
+
+<span class="hljs-keyword">import</span> java.util.Arrays;
+<span class="hljs-keyword">import</span> java.util.List;
+<span class="hljs-keyword">import</span> java.util.Optional;
+<span class="hljs-keyword">import</span> java.util.Set;
+<span class="hljs-keyword">import</span> java.util.stream.Collectors;
+<span class="hljs-keyword">import</span> java.util.stream.Stream;
+
+<span class="hljs-comment">/**</span>
+<span class="hljs-comment"> * Created with IntelliJ IDEA.</span>
+<span class="hljs-comment"> *</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@author</span> : hcj</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@version</span> : 1.0</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@Project</span> : java8新特性</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@Package</span> : Stream</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@ClassName</span> : StreamTest3.java</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@createTime</span> : 2023/2/6 12:59</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@Description</span> :</span>
+<span class="hljs-comment"> */</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">StreamTest3</span> &#123;
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">StreamAPITest2</span> &#123;
+
+        <span class="hljs-comment">//1-匹配与查找</span>
+        <span class="hljs-meta">@Test</span>
+        <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">test1</span><span class="hljs-params">()</span> &#123;
+            List&lt;Employee&gt; employees = EmployeeData.getEmployees();
+
+<span class="hljs-comment">//        allMatch(Predicate p)——检查是否匹配所有元素。</span>
+<span class="hljs-comment">//          练习：是否所有的员工的年龄都大于18</span>
+            <span class="hljs-type">boolean</span> <span class="hljs-variable">allMatch</span> <span class="hljs-operator">=</span> employees.stream().allMatch(e -&gt; e.getAge() &gt; <span class="hljs-number">18</span>);
+            System.out.println(allMatch);
+
+<span class="hljs-comment">//        anyMatch(Predicate p)——检查是否至少匹配一个元素。</span>
+<span class="hljs-comment">//         练习：是否存在员工的工资大于 10000</span>
+            <span class="hljs-type">boolean</span> <span class="hljs-variable">anyMatch</span> <span class="hljs-operator">=</span> employees.stream().anyMatch(e -&gt; e.getSalary() &gt; <span class="hljs-number">10000</span>);
+            System.out.println(anyMatch);
+
+<span class="hljs-comment">//        noneMatch(Predicate p)——检查是否没有匹配的元素。</span>
+<span class="hljs-comment">//          练习：是否存在员工姓“雷”</span>
+            <span class="hljs-type">boolean</span> <span class="hljs-variable">noneMatch</span> <span class="hljs-operator">=</span> employees.stream().noneMatch(e -&gt; e.getName().startsWith(<span class="hljs-string">&quot;雷&quot;</span>));
+            System.out.println(noneMatch);
+<span class="hljs-comment">//        findFirst——返回第一个元素</span>
+            Optional&lt;Employee&gt; employee = employees.stream().findFirst();
+            System.out.println(employee);
+<span class="hljs-comment">//        findAny——返回当前流中的任意元素</span>
+            Optional&lt;Employee&gt; employee1 = employees.parallelStream().findAny();
+            System.out.println(employee1);
+
+        &#125;
+
+        <span class="hljs-meta">@Test</span>
+        <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">test2</span><span class="hljs-params">()</span> &#123;
+            List&lt;Employee&gt; employees = EmployeeData.getEmployees();
+            <span class="hljs-comment">// count——返回流中元素的总个数</span>
+            <span class="hljs-type">long</span> <span class="hljs-variable">count</span> <span class="hljs-operator">=</span> employees.stream().filter(e -&gt; e.getSalary() &gt; <span class="hljs-number">5000</span>).count();
+            System.out.println(count);
+<span class="hljs-comment">//        max(Comparator c)——返回流中最大值</span>
+<span class="hljs-comment">//        练习：返回最高的工资：</span>
+            Stream&lt;Double&gt; salaryStream = employees.stream().map(e -&gt; e.getSalary());
+            Optional&lt;Double&gt; maxSalary = salaryStream.max(Double::compare);
+            System.out.println(maxSalary);
+<span class="hljs-comment">//        min(Comparator c)——返回流中最小值</span>
+<span class="hljs-comment">//        练习：返回最低工资的员工</span>
+            Optional&lt;Employee&gt; employee = employees.stream().min((e1, e2) -&gt; Double.compare(e1.getSalary(), e2.getSalary()));
+            System.out.println(employee);
+            System.out.println();
+<span class="hljs-comment">//        forEach(Consumer c)——内部迭代</span>
+            employees.stream().forEach(System.out::println);
+
+            <span class="hljs-comment">//使用集合的遍历操作</span>
+            employees.forEach(System.out::println);
+        &#125;
+
+        <span class="hljs-comment">//2-归约</span>
+        <span class="hljs-meta">@Test</span>
+        <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">test3</span><span class="hljs-params">()</span> &#123;
+<span class="hljs-comment">//        reduce(T identity, BinaryOperator)——可以将流中元素反复结合起来，得到一个值。返回 T</span>
+<span class="hljs-comment">//        练习1：计算1-10的自然数的和</span>
+            List&lt;Integer&gt; list = Arrays.asList(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>, <span class="hljs-number">5</span>, <span class="hljs-number">6</span>, <span class="hljs-number">7</span>, <span class="hljs-number">8</span>, <span class="hljs-number">9</span>, <span class="hljs-number">10</span>);
+            <span class="hljs-type">Integer</span> <span class="hljs-variable">sum</span> <span class="hljs-operator">=</span> list.stream().reduce(<span class="hljs-number">0</span>, Integer::sum);
+            System.out.println(sum);
+
+
+<span class="hljs-comment">//        reduce(BinaryOperator) ——可以将流中元素反复结合起来，得到一个值。返回 Optional&lt;T&gt;</span>
+<span class="hljs-comment">//        练习2：计算公司所有员工工资的总和</span>
+            List&lt;Employee&gt; employees = EmployeeData.getEmployees();
+            Stream&lt;Double&gt; salaryStream = employees.stream().map(Employee::getSalary);
+<span class="hljs-comment">//        Optional&lt;Double&gt; sumMoney = salaryStream.reduce(Double::sum);</span>
+            Optional&lt;Double&gt; sumMoney = salaryStream.reduce((d1, d2) -&gt; d1 + d2);
+            System.out.println(sumMoney.get());
+
+        &#125;
+
+        <span class="hljs-comment">//3-收集</span>
+        <span class="hljs-meta">@Test</span>
+        <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">test4</span><span class="hljs-params">()</span> &#123;
+<span class="hljs-comment">//        collect(Collector c)——将流转换为其他形式。接收一个 Collector接口的实现，用于给Stream中元素做汇总的方法</span>
+<span class="hljs-comment">//        练习1：查找工资大于6000的员工，结果返回为一个List或Set</span>
+
+            List&lt;Employee&gt; employees = EmployeeData.getEmployees();
+            List&lt;Employee&gt; employeeList = employees.stream().filter(e -&gt; e.getSalary() &gt; <span class="hljs-number">6000</span>).collect(Collectors.toList());
+
+            employeeList.forEach(System.out::println);
+            System.out.println();
+            Set&lt;Employee&gt; employeeSet = employees.stream().filter(e -&gt; e.getSalary() &gt; <span class="hljs-number">6000</span>).collect(Collectors.toSet());
+            employeeSet.forEach(System.out::println);
+
+        &#125;
+    &#125;
+&#125;
+</code></pre>
+
+
+
+
+
+<h2 id="Optional-类"><a href="#Optional-类" class="headerlink" title="Optional 类"></a>Optional 类</h2><p>Optional 解决空指针异常</p>
+<pre><code class="hljs java"><span class="hljs-keyword">package</span> Optional;
+
+<span class="hljs-keyword">import</span> org.junit.Test;
+
+<span class="hljs-keyword">import</span> java.util.Optional;
+
+<span class="hljs-comment">/**</span>
+<span class="hljs-comment"> * Created with IntelliJ IDEA.</span>
+<span class="hljs-comment"> *</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@author</span> : hcj</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@version</span> : 1.0</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@Project</span> : java8新特性</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@Package</span> : Optional</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@ClassName</span> : OptionalTest.java</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@createTime</span> : 2023/2/6 13:53</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@Description</span> :</span>
+<span class="hljs-comment"> */</span>
+
+<span class="hljs-comment">/**</span>
+<span class="hljs-comment"> * Optional类：为了在程序中避免出现空指针异常而创建的。</span>
+<span class="hljs-comment"> * &lt;p&gt;</span>
+<span class="hljs-comment"> * 常用的方法：ofNullable(T t)</span>
+<span class="hljs-comment"> * orElse(T t)</span>
+<span class="hljs-comment"> */</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">OPtionalTest</span> &#123;
+    <span class="hljs-meta">@Test</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">test1</span><span class="hljs-params">()</span> &#123;
+        <span class="hljs-type">Boy</span> <span class="hljs-variable">boy</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Boy</span>();
+        <span class="hljs-comment">// of(T t): 保证t是非空的</span>
+        Optional&lt;Boy&gt; boy1 = Optional.of(boy);
+        System.out.println(boy1);
+
+    &#125;
+
+    <span class="hljs-meta">@Test</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">test2</span><span class="hljs-params">()</span> &#123;
+        <span class="hljs-type">Boy</span> <span class="hljs-variable">boy</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Boy</span>();
+        boy=<span class="hljs-literal">null</span>; 
+        <span class="hljs-comment">//ofNullable(T t): t可以为null</span>
+        Optional&lt;Boy&gt; boy1 = Optional.ofNullable(boy);<span class="hljs-comment">//Optional.empty</span>
+        System.out.println(boy1);
+        <span class="hljs-comment">//orElse(T t1):如果单前的Optional内部封装的t是非空的，则返回内部的t.</span>
+        <span class="hljs-comment">//如果内部的t是空的，则返回orElse()方法中的参数t1.</span>
+        <span class="hljs-type">Boy</span> <span class="hljs-variable">boy2</span> <span class="hljs-operator">=</span> boy1.orElse(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Boy</span>(<span class="hljs-string">&quot;胡歌&quot;</span>));
+        System.out.println(boy2);
+    &#125;
+
+    <span class="hljs-meta">@Test</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">test3</span><span class="hljs-params">()</span> &#123;
+        <span class="hljs-type">Girl</span> <span class="hljs-variable">girl</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Girl</span>();
+        <span class="hljs-type">String</span> <span class="hljs-variable">name</span> <span class="hljs-operator">=</span> getBoyName_2(girl);
+        System.out.println(name);
+    &#125;
+
+
+    <span class="hljs-comment">// 容易出现NullPointerException 空指针异常</span>
+    <span class="hljs-keyword">public</span> String <span class="hljs-title function_">getBoyName</span><span class="hljs-params">(Girl girl)</span>&#123;
+        <span class="hljs-keyword">return</span> girl.getBoy().getName();
+    &#125;
+    <span class="hljs-comment">//优化getBoyName 方法</span>
+<span class="hljs-comment">// 容易出现NullPointerException 空指针异常</span>
+    <span class="hljs-keyword">public</span> String <span class="hljs-title function_">getBoyName_2</span><span class="hljs-params">(Girl girl)</span>&#123;
+        Optional&lt;Girl&gt; girl1 = Optional.ofNullable(girl);
+        <span class="hljs-comment">// girl 空</span>
+        <span class="hljs-type">Girl</span> <span class="hljs-variable">hcj</span> <span class="hljs-operator">=</span> girl1.orElse(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Girl</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Boy</span>(<span class="hljs-string">&quot;hcj&quot;</span>)));
+        <span class="hljs-type">Boy</span> <span class="hljs-variable">boy</span> <span class="hljs-operator">=</span> hcj.getBoy();
+        Optional&lt;Boy&gt; boy1 = Optional.ofNullable(boy);
+        <span class="hljs-comment">// boy  空</span>
+        <span class="hljs-type">Boy</span> <span class="hljs-variable">boy2</span> <span class="hljs-operator">=</span> boy1.orElse(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Boy</span>(<span class="hljs-string">&quot;阿斯顿&quot;</span>));
+
+        <span class="hljs-keyword">return</span> boy2.getName();
+    &#125;
+
+&#125;
+
+
+
+
+<span class="hljs-keyword">package</span> Optional;
+
+<span class="hljs-comment">/**</span>
+<span class="hljs-comment"> * Created with IntelliJ IDEA.</span>
+<span class="hljs-comment"> *</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@author</span> : hcj</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@version</span> : 1.0</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@Project</span> : java8新特性</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@Package</span> : Optional</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@ClassName</span> : Boy.java</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@createTime</span> : 2023/2/6 13:53</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@Description</span> :</span>
+<span class="hljs-comment"> */</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Boy</span> &#123;
+    <span class="hljs-keyword">private</span> String name;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-title function_">Boy</span><span class="hljs-params">(String name)</span> &#123;
+        <span class="hljs-built_in">this</span>.name = name;
+    &#125;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-title function_">Boy</span><span class="hljs-params">()</span> &#123;
+    &#125;
+
+    <span class="hljs-keyword">public</span> String <span class="hljs-title function_">getName</span><span class="hljs-params">()</span> &#123;
+        <span class="hljs-keyword">return</span> name;
+    &#125;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">setName</span><span class="hljs-params">(String name)</span> &#123;
+        <span class="hljs-built_in">this</span>.name = name;
+    &#125;
+
+    <span class="hljs-meta">@Override</span>
+    <span class="hljs-keyword">public</span> String <span class="hljs-title function_">toString</span><span class="hljs-params">()</span> &#123;
+        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;Boy&#123;&quot;</span> +
+                <span class="hljs-string">&quot;name=&#x27;&quot;</span> + name + <span class="hljs-string">&#x27;\&#x27;&#x27;</span> +
+                <span class="hljs-string">&#x27;&#125;&#x27;</span>;
+    &#125;
+&#125;
+
+<span class="hljs-keyword">package</span> Optional;
+
+<span class="hljs-comment">/**</span>
+<span class="hljs-comment"> * Created with IntelliJ IDEA.</span>
+<span class="hljs-comment"> *</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@author</span> : hcj</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@version</span> : 1.0</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@Project</span> : java8新特性</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@Package</span> : Optional</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@ClassName</span> : Girl.java</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@createTime</span> : 2023/2/6 13:53</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@Description</span> :</span>
+<span class="hljs-comment"> */</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Girl</span> &#123;
+    <span class="hljs-keyword">private</span> Boy boy;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-title function_">Girl</span><span class="hljs-params">(Boy boy)</span> &#123;
+        <span class="hljs-built_in">this</span>.boy = boy;
+    &#125;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-title function_">Girl</span><span class="hljs-params">()</span> &#123;
+    &#125;
+
+    <span class="hljs-keyword">public</span> Boy <span class="hljs-title function_">getBoy</span><span class="hljs-params">()</span> &#123;
+        <span class="hljs-keyword">return</span> boy;
+    &#125;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">setBoy</span><span class="hljs-params">(Boy boy)</span> &#123;
+        <span class="hljs-built_in">this</span>.boy = boy;
+    &#125;
+
+    <span class="hljs-meta">@Override</span>
+    <span class="hljs-keyword">public</span> String <span class="hljs-title function_">toString</span><span class="hljs-params">()</span> &#123;
+        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;Girl&#123;&quot;</span> +
+                <span class="hljs-string">&quot;boy=&quot;</span> + boy +
+                <span class="hljs-string">&#x27;&#125;&#x27;</span>;
+    &#125;
+&#125;
+</code></pre>
+
+
+
+
+
+
+
+
+
+
+
+<h2 id="注解"><a href="#注解" class="headerlink" title="注解"></a>注解</h2><h4 id="可重复注解"><a href="#可重复注解" class="headerlink" title="可重复注解"></a>可重复注解</h4><p>jdk8以前</p>
+<pre><code class="hljs java"><span class="hljs-keyword">package</span> com.atguigu.java1;
+
+<span class="hljs-keyword">import</span> java.lang.annotation.Inherited;
+<span class="hljs-keyword">import</span> java.lang.annotation.Retention;
+<span class="hljs-keyword">import</span> java.lang.annotation.RetentionPolicy;
+<span class="hljs-keyword">import</span> java.lang.annotation.Target;
+
+<span class="hljs-keyword">import</span> <span class="hljs-keyword">static</span> java.lang.annotation.ElementType.*;
+
+<span class="hljs-comment">/**</span>
+<span class="hljs-comment"> *</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@author</span> shkstart</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@create</span> 2019 下午 2:41</span>
+<span class="hljs-comment"> */</span>
+<span class="hljs-meta">@Inherited</span>
+<span class="hljs-meta">@Retention(RetentionPolicy.RUNTIME)</span>
+<span class="hljs-meta">@Target(&#123;TYPE, FIELD, METHOD, PARAMETER, CONSTRUCTOR, LOCAL_VARIABLE&#125;)</span>
+<span class="hljs-keyword">public</span> <span class="hljs-meta">@interface</span> MyAnnotations &#123;
+
+    MyAnnotation[] value();
+&#125;
+
+
+<span class="hljs-comment">//jdk 8之前的写法：</span>
+<span class="hljs-meta">@MyAnnotations(&#123;@MyAnnotation(value=&quot;hi&quot;),@MyAnnotation(value=&quot;hi&quot;)&#125;)</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Person</span>&#123;
+    <span class="hljs-keyword">private</span> String name;
+    <span class="hljs-keyword">private</span> <span class="hljs-type">int</span> age;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-title function_">Person</span><span class="hljs-params">()</span> &#123;
+    &#125;
+    <span class="hljs-meta">@MyAnnotation</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-title function_">Person</span><span class="hljs-params">(String name, <span class="hljs-type">int</span> age)</span> &#123;
+        <span class="hljs-built_in">this</span>.name = name;
+        <span class="hljs-built_in">this</span>.age = age;</code></pre>
+
+<p>jdk8之后</p>
+<pre><code class="hljs java"><span class="hljs-keyword">package</span> com.atguigu.java1;
+
+<span class="hljs-keyword">import</span> org.junit.Test;
+
+<span class="hljs-keyword">import</span> java.lang.annotation.Annotation;
+<span class="hljs-keyword">import</span> java.util.ArrayList;
+<span class="hljs-keyword">import</span> java.util.Date;
+
+<span class="hljs-comment">/**</span>
+<span class="hljs-comment"> * 注解的使用</span>
+<span class="hljs-comment"> *</span>
+<span class="hljs-comment"> * 1. 理解Annotation:</span>
+<span class="hljs-comment"> * ① jdk 5.0 新增的功能</span>
+<span class="hljs-comment"> *</span>
+<span class="hljs-comment"> * ② Annotation 其实就是代码里的特殊标记, 这些标记可以在编译, 类加载, 运行时被读取, 并执行相应的处理。通过使用 Annotation,</span>
+<span class="hljs-comment"> * 程序员可以在不改变原有逻辑的情况下, 在源文件中嵌入一些补充信息。</span>
+<span class="hljs-comment"> *</span>
+<span class="hljs-comment"> * ③在JavaSE中，注解的使用目的比较简单，例如标记过时的功能，忽略警告等。在JavaEE/Android</span>
+<span class="hljs-comment"> * 中注解占据了更重要的角色，例如用来配置应用程序的任何切面，代替JavaEE旧版中所遗留的繁冗</span>
+<span class="hljs-comment"> * 代码和XML配置等。</span>
+<span class="hljs-comment"> *</span>
+<span class="hljs-comment"> * 2. Annocation的使用示例</span>
+<span class="hljs-comment"> * 示例一：生成文档相关的注解</span>
+<span class="hljs-comment"> * 示例二：在编译时进行格式检查(JDK内置的三个基本注解)</span>
+<span class="hljs-comment">     <span class="hljs-doctag">@Override</span>: 限定重写父类方法, 该注解只能用于方法</span>
+<span class="hljs-comment">     <span class="hljs-doctag">@Deprecated</span>: 用于表示所修饰的元素(类, 方法等)已过时。通常是因为所修饰的结构危险或存在更好的选择</span>
+<span class="hljs-comment">     <span class="hljs-doctag">@SuppressWarnings</span>: 抑制编译器警告</span>
+<span class="hljs-comment"></span>
+<span class="hljs-comment">  * 示例三：跟踪代码依赖性，实现替代配置文件功能</span>
+<span class="hljs-comment">  *</span>
+<span class="hljs-comment">  * 3. 如何自定义注解：参照<span class="hljs-doctag">@SuppressWarnings</span>定义</span>
+<span class="hljs-comment">      * ① 注解声明为：<span class="hljs-doctag">@interface</span></span>
+<span class="hljs-comment">      * ② 内部定义成员，通常使用value表示</span>
+<span class="hljs-comment">      * ③ 可以指定成员的默认值，使用default定义</span>
+<span class="hljs-comment">      * ④ 如果自定义注解没有成员，表明是一个标识作用。</span>
+<span class="hljs-comment"></span>
+<span class="hljs-comment">     如果注解有成员，在使用注解时，需要指明成员的值。</span>
+<span class="hljs-comment">     自定义注解必须配上注解的信息处理流程(使用反射)才有意义。</span>
+<span class="hljs-comment">     自定义注解通过都会指明两个元注解：Retention、Target</span>
+<span class="hljs-comment"></span>
+<span class="hljs-comment">     4. jdk 提供的4种元注解</span>
+<span class="hljs-comment">       元注解：对现有的注解进行解释说明的注解</span>
+<span class="hljs-comment">     Retention：指定所修饰的 Annotation 的生命周期：SOURCE\CLASS（默认行为）\RUNTIME</span>
+<span class="hljs-comment">            只有声明为RUNTIME生命周期的注解，才能通过反射获取。</span>
+<span class="hljs-comment">     Target:用于指定被修饰的 Annotation 能用于修饰哪些程序元素</span>
+<span class="hljs-comment">     *******出现的频率较低*******</span>
+<span class="hljs-comment">     Documented:表示所修饰的注解在被javadoc解析时，保留下来。</span>
+<span class="hljs-comment">     Inherited:被它修饰的 Annotation 将具有继承性。</span>
+<span class="hljs-comment"></span>
+<span class="hljs-comment">     5.通过反射获取注解信息 ---到反射内容时系统讲解</span>
+<span class="hljs-comment"></span>
+<span class="hljs-comment">     6. jdk 8 中注解的新特性：可重复注解、类型注解</span>
+<span class="hljs-comment"></span>
+<span class="hljs-comment">     6.1 可重复注解：① 在MyAnnotation上声明<span class="hljs-doctag">@Repeatable</span>，成员值为MyAnnotations.class</span>
+<span class="hljs-comment">                    ② MyAnnotation的Target和Retention等元注解与MyAnnotations相同。</span>
+<span class="hljs-comment"></span>
+<span class="hljs-comment">     6.2 类型注解：</span>
+<span class="hljs-comment">     ElementType.TYPE_PARAMETER 表示该注解能写在类型变量的声明语句中（如：泛型声明）。</span>
+<span class="hljs-comment">     ElementType.TYPE_USE 表示该注解能写在使用类型的任何语句中。</span>
+<span class="hljs-comment"></span>
+<span class="hljs-comment">      *</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@author</span> shkstart</span>
+<span class="hljs-comment"> * <span class="hljs-doctag">@create</span> 2019 上午 11:37</span>
+<span class="hljs-comment"> */</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">AnnotationTest</span> &#123;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> &#123;
+        <span class="hljs-type">Person</span> <span class="hljs-variable">p</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Student</span>();
+        p.walk();
+
+        <span class="hljs-type">Date</span> <span class="hljs-variable">date</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Date</span>(<span class="hljs-number">2020</span>, <span class="hljs-number">10</span>, <span class="hljs-number">11</span>);
+        System.out.println(date);
+
+        <span class="hljs-meta">@SuppressWarnings(&quot;unused&quot;)</span>
+        <span class="hljs-type">int</span> <span class="hljs-variable">num</span> <span class="hljs-operator">=</span> <span class="hljs-number">10</span>;
+
+<span class="hljs-comment">//        System.out.println(num);</span>
+
+        <span class="hljs-meta">@SuppressWarnings(&#123; &quot;unused&quot;, &quot;rawtypes&quot; &#125;)</span>
+        <span class="hljs-type">ArrayList</span> <span class="hljs-variable">list</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayList</span>();
+    &#125;
+
+    <span class="hljs-meta">@Test</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">testGetAnnotation</span><span class="hljs-params">()</span>&#123;
+        <span class="hljs-type">Class</span> <span class="hljs-variable">clazz</span> <span class="hljs-operator">=</span> Student.class;
+        Annotation[] annotations = clazz.getAnnotations();
+        <span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> <span class="hljs-variable">i</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>;i &lt; annotations.length;i++)&#123;
+            System.out.println(annotations[i]);
+        &#125;
+    &#125;
+&#125;
+
+
+<span class="hljs-comment">//jdk 8之前的写法：</span>
+<span class="hljs-comment">//@MyAnnotations(&#123;@MyAnnotation(value=&quot;hi&quot;),@MyAnnotation(value=&quot;hi&quot;)&#125;)</span>
+<span class="hljs-meta">@MyAnnotation(value=&quot;hi&quot;)</span>
+<span class="hljs-meta">@MyAnnotation(value=&quot;abc&quot;)</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Person</span>&#123;
+    <span class="hljs-keyword">private</span> String name;
+    <span class="hljs-keyword">private</span> <span class="hljs-type">int</span> age;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-title function_">Person</span><span class="hljs-params">()</span> &#123;
+    &#125;
+    <span class="hljs-meta">@MyAnnotation</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-title function_">Person</span><span class="hljs-params">(String name, <span class="hljs-type">int</span> age)</span> &#123;
+        <span class="hljs-built_in">this</span>.name = name;
+        <span class="hljs-built_in">this</span>.age = age;
+    &#125;
+    <span class="hljs-meta">@MyAnnotation</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">walk</span><span class="hljs-params">()</span>&#123;
+        System.out.println(<span class="hljs-string">&quot;人走路&quot;</span>);
+    &#125;
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">eat</span><span class="hljs-params">()</span>&#123;
+        System.out.println(<span class="hljs-string">&quot;人吃饭&quot;</span>);
+    &#125;
+&#125;
+
+<span class="hljs-keyword">interface</span> <span class="hljs-title class_">Info</span>&#123;
+    <span class="hljs-keyword">void</span> <span class="hljs-title function_">show</span><span class="hljs-params">()</span>;
+&#125;
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Student</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">Person</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">Info</span>&#123;
+
+    <span class="hljs-meta">@Override</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">walk</span><span class="hljs-params">()</span> &#123;
+        System.out.println(<span class="hljs-string">&quot;学生走路&quot;</span>);
+    &#125;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">show</span><span class="hljs-params">()</span> &#123;
+
+    &#125;
+&#125;
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Generic</span>&lt;<span class="hljs-meta">@MyAnnotation</span> T&gt;&#123;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">show</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> <span class="hljs-meta">@MyAnnotation</span> RuntimeException&#123;
+
+        ArrayList&lt;<span class="hljs-meta">@MyAnnotation</span> String&gt; list = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayList</span>&lt;&gt;();
+
+        <span class="hljs-type">int</span> <span class="hljs-variable">num</span> <span class="hljs-operator">=</span> (<span class="hljs-meta">@MyAnnotation</span> <span class="hljs-type">int</span>) <span class="hljs-number">10L</span>;
+    &#125;
+
+&#125;</code></pre>
+
+
+
+
+
+
+
+<h2 id="JAVA8-中新时间API"><a href="#JAVA8-中新时间API" class="headerlink" title="JAVA8 中新时间API"></a>JAVA8 中新时间API</h2><p>如果我们可以跟别人说：“我们在1502643933071见面，别晚了！”那么就再简单不 过了。但是我们希望时间与昼夜和四季有关，于是事情就变复杂了。JDK 1.0中包含了 一个java.util.Date类，但是它的大多数方法已经在JDK 1.1引入Calendar类之后被弃用 了。</p>
+<p>而Calendar并不比Date好多少。它们面临的问题是： </p>
+<ul>
+<li>可变性：像日期和时间这样的类应该是不可变的。 </li>
+<li>偏移性：Date中的年份是从1900开始的，而月份都从0开始。 </li>
+<li>格式化：格式化只对Date有用，Calendar则不行。 </li>
+<li>此外，它们也不是线程安全的；不能处理闰秒等</li>
+</ul>
+<p><strong>总结：对日期和时间的操作一直是Java程序员最痛苦的地方之一。</strong></p>
+</div></article><div class="copyright-wrapper"><p>原文作者:<a href="http://example.com">hcj</a></p><p>原文链接:<a href="http://example.com/2022/03/12/java8%E6%96%B0%E7%89%B9%E6%80%A7/">java8新特性</a></p><p>发表日期: 2022-03-12 15:47:13</p><p>更新日期: 2024-03-15 21:43:51</p><p>版权声明: 本文采用<a rel="license noopener" target="_blank" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p></div><div class="post-pager"><div class="prev"><a href="/2022/11/15/Docker/" title="Docker">上一篇 Docker</a></div><div class="next"> </div></div></section></section></main><footer class="footer-page"><div><span>Powered by</span><a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a><span>| Theme</span><a target="_blank" rel="noopener" href="https://github.com/techmovie/hexo-theme-instapaper">instapaper</a></div></footer><script src="/scripts/dark.js"></script><script src="/scripts/post.js"></script></body></html>
