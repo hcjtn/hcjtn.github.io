@@ -1,43 +1,102 @@
-<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible"><meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1,user-scalable=no"><meta name="renderer" content="webkit"><meta name="color-scheme" content="dark light"><meta name="author" content="hcj"><meta name="description" content=""><meta name="keywords" content=""><title>字节码指令集</title><link rel="icon" type="image/x-icon" href="/images/favicon.ico"><link rel="stylesheet" href="//at.alicdn.com/t/font_3242539_utq6ykfq7z.css"><link rel="stylesheet" light-src="https://cdn.staticfile.org/highlight.js/11.5.0/styles/github.min.css" dark-src="https://cdn.staticfile.org/highlight.js/11.5.0/styles/github-dark.min.css"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Serif" as="font"><link href="/style/index.css" rel="stylesheet"><meta name="generator" content="Hexo 7.1.1"><link rel="alternate" href="/atom.xml" title="ArcLength" type="application/atom+xml">
-</head><body><header class="page-header"><nav><ul class="router-list"><li class="nav-item"> <a href="/">主页</a></li><li class="nav-item"> <a href="/archives/">归档</a></li><li class="nav-item"> <a href="/atom.xml">RSS</a></li></ul><div class="mode-switch"><span class="iconfont icon-DarkTheme"></span></div></nav></header><main><section class="main-content"><section class="post-page"><div class="title-bar"><h1>字节码指令集</h1><div class="post-info"><span>2023-10-12 20:16:15</span><span class="tags"><a href="/tags/CLASS/">#CLASS</a></span></div></div><article> <div class="content"><h3 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h3><p>Java字节码对于JVM就像汇编对于计算机，属于基本执行指令</p>
-<p>java虚拟机有一个字节长度的、代表着某种特定操作含义的数字（称为操作码）以及紧随其后的0到多个代表此操作所需要参数（操作数）而构成。大多数的指令都不包含操作数，只有一个操作码</p>
-<p>字节长度(0~255)限制了指令集死亡操作码总数不能超过256</p>
-<h3 id="执行流程"><a href="#执行流程" class="headerlink" title="执行流程"></a>执行流程</h3><p>如果不考虑异常处理的话，那么Java虚拟机的解释器可以使用下面这个伪代码当做最基本的执行模型来理解</p>
-<p>do{</p>
-<p>自动计算PC寄存器的值加1;</p>
-<p>根据Pc寄存器的指示位置，从字节码流中取出操作码;</p>
-<p>if(字节码存在操作数){</p>
-<p>​		从字节码流中取出操作数;</p>
-<p>​        执行操作码所定义的操作;</p>
-<p>}while(字节码长度&gt;0);</p>
-<h2 id="加载和存储指令"><a href="#加载和存储指令" class="headerlink" title="加载和存储指令"></a>加载和存储指令</h2><p>操作数栈：存放计算的操作数栈和返回结果</p>
-<ul>
-<li>执行每一条指令之前，Java虚拟机要求该指令的操作数栈已被压入操作数栈中。在执行指令的时候，<strong>java虚拟机会将该指令所需要的操作数弹出，并且将指令的结果重新压入栈中</strong></li>
-</ul>
-<p>局部变量表：字节码程序将计算的结果缓存到局部变量区之中</p>
-<ul>
-<li>jvm将局部变量区当成一个数组，依次存放this指针(仅非静态方法)，所传入的参数，以及字节码中局部变量</li>
-</ul>
-<h4 id="局部变量压栈指令-load"><a href="#局部变量压栈指令-load" class="headerlink" title="局部变量压栈指令 load"></a>局部变量压栈指令 load</h4><p>局部变量压栈指令将给定的局部变量表中的数据压入操作数栈</p>
-<p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
-  class="img-loading" data-original="/%5Ctushi%5CSnipaste_2023-05-28_10-33-08.png"" alt="Snipaste_2023-05-28_10-33-08"></p>
-<p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
-  class="img-loading" data-original="/%5Ctushi%5CSnipaste_2023-05-28_11-03-00.png""></p>
-<pre><code class="hljs java"><span class="hljs-comment">//1.局部变量压栈指令</span>
-  <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">load</span><span class="hljs-params">(<span class="hljs-type">int</span> num, Object obj,<span class="hljs-type">long</span> count,<span class="hljs-type">boolean</span> flag,<span class="hljs-type">short</span>[] arr)</span> &#123;
-      System.out.println(num);
-      System.out.println(obj);
-      System.out.println(count);
-      System.out.println(flag);
-      System.out.println(arr);
-  &#125;</code></pre>
+<!DOCTYPE html>
+<html lang="zh-CN">
 
-<p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
-  class="img-loading" data-original="/%5Ctushi%5CSnipaste_2023-05-28_11-17-58.png""></p>
-<h4 id="常量入栈指令"><a href="#常量入栈指令" class="headerlink" title="常量入栈指令"></a>常量入栈指令</h4><p>常量入栈指令的功能是将常数压入操作数栈，根据数据类型和入栈内容不同，又可以分为const系列、push系列和ldc指令</p>
-<p>const系列：用于对特定的常量入栈，入栈的常量隐含在指令本身里面</p>
-<p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
-  class="img-loading" data-original="/%5Ctushi%5CSnipaste_2023-05-28_11-28-29.png""></p>
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible">
+  <meta name="viewport"
+    content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1,user-scalable=no">
+  <meta name="renderer" content="webkit">
+  <meta name="color-scheme" content="dark light">
+  <meta name="author" content="hcj">
+  <meta name="description" content="">
+  <meta name="keywords" content="">
+  <title>字节码指令集</title>
+  <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+  <link rel="stylesheet" href="//at.alicdn.com/t/font_3242539_utq6ykfq7z.css">
+  <link rel="stylesheet" light-src="https://cdn.staticfile.org/highlight.js/11.5.0/styles/github.min.css"
+    dark-src="https://cdn.staticfile.org/highlight.js/11.5.0/styles/github-dark.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Serif" as="font">
+  <link href="/style/index.css" rel="stylesheet">
+  <meta name="generator" content="Hexo 7.1.1">
+  <link rel="alternate" href="/atom.xml" title="ArcLength" type="application/atom+xml">
+</head>
+
+<body>
+  <header class="page-header">
+    <nav>
+      <ul class="router-list">
+        <li class="nav-item"> <a href="/">主页</a></li>
+        <li class="nav-item"> <a href="/archives/">归档</a></li>
+        <li class="nav-item"> <a href="/atom.xml">RSS</a></li>
+      </ul>
+      <div class="mode-switch"><span class="iconfont icon-DarkTheme"></span></div>
+    </nav>
+  </header>
+  <main>
+    <section class="main-content">
+      <section class="post-page">
+        <div class="title-bar">
+          <h1>字节码指令集</h1>
+          <div class="post-info"><span>2023-10-12 20:16:15</span><span class="tags"><a
+                href="/tags/CLASS/">#CLASS</a></span></div>
+        </div>
+        <article>
+          <div class="content">
+            <h3 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h3>
+            <p>Java字节码对于JVM就像汇编对于计算机，属于基本执行指令</p>
+            <p>java虚拟机有一个字节长度的、代表着某种特定操作含义的数字（称为操作码）以及紧随其后的0到多个代表此操作所需要参数（操作数）而构成。大多数的指令都不包含操作数，只有一个操作码</p>
+            <p>字节长度(0~255)限制了指令集死亡操作码总数不能超过256</p>
+            <h3 id="执行流程"><a href="#执行流程" class="headerlink" title="执行流程"></a>执行流程</h3>
+            <p>如果不考虑异常处理的话，那么Java虚拟机的解释器可以使用下面这个伪代码当做最基本的执行模型来理解</p>
+            <p>do{</p>
+            <p>自动计算PC寄存器的值加1;</p>
+            <p>根据Pc寄存器的指示位置，从字节码流中取出操作码;</p>
+            <p>if(字节码存在操作数){</p>
+            <p>​ 从字节码流中取出操作数;</p>
+            <p>​ 执行操作码所定义的操作;</p>
+            <p>}while(字节码长度&gt;0);</p>
+            <h2 id="加载和存储指令"><a href="#加载和存储指令" class="headerlink" title="加载和存储指令"></a>加载和存储指令</h2>
+            <p>操作数栈：存放计算的操作数栈和返回结果</p>
+            <ul>
+              <li>执行每一条指令之前，Java虚拟机要求该指令的操作数栈已被压入操作数栈中。在执行指令的时候，<strong>java虚拟机会将该指令所需要的操作数弹出，并且将指令的结果重新压入栈中</strong>
+              </li>
+            </ul>
+            <p>局部变量表：字节码程序将计算的结果缓存到局部变量区之中</p>
+            <ul>
+              <li>jvm将局部变量区当成一个数组，依次存放this指针(仅非静态方法)，所传入的参数，以及字节码中局部变量</li>
+            </ul>
+            <h4 id="局部变量压栈指令-load"><a href="#局部变量压栈指令-load" class="headerlink" title="局部变量压栈指令 load"></a>局部变量压栈指令 load
+            </h4>
+            <p>局部变量压栈指令将给定的局部变量表中的数据压入操作数栈</p>
+            <p><img
+                src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg=="
+                class="img-loading" data-original="\tushi\CSnipaste_2023-05-28_10-33-08.png"" alt="
+                Snipaste_2023-05-28_10-33-08"></p>
+            <p><img
+                src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg=="
+                class="img-loading" data-original="\tushi\CSnipaste_2023-05-28_11-03-00.png""></p>
+<pre><code class=" hljs java"><span class="hljs-comment">//1.局部变量压栈指令</span>
+              <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span
+                class="hljs-title function_">load</span><span class="hljs-params">(<span class="hljs-type">int</span>
+                num, Object obj,<span class="hljs-type">long</span> count,<span class="hljs-type">boolean</span>
+                flag,<span class="hljs-type">short</span>[] arr)</span> &#123;
+              System.out.println(num);
+              System.out.println(obj);
+              System.out.println(count);
+              System.out.println(flag);
+              System.out.println(arr);
+              &#125;</code></pre>
+
+            <p><img
+                src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg=="
+                class="img-loading" data-original="\tushi\CSnipaste_2023-05-28_11-17-58.png""></p>
+<h4 id=" 常量入栈指令"><a href="#常量入栈指令" class="headerlink" title="常量入栈指令"></a>常量入栈指令</h4>
+            <p>常量入栈指令的功能是将常数压入操作数栈，根据数据类型和入栈内容不同，又可以分为const系列、push系列和ldc指令</p>
+            <p>const系列：用于对特定的常量入栈，入栈的常量隐含在指令本身里面</p>
+            <p><img
+                src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg=="
+                class="img-loading" data-original="\tushi\CSnipaste_2023-05-28_11-28-29.png""></p>
 <p>push系列：主要包括bipush和sipush。他们的主要区别是接收数据类型不同，bipush是接收8位整数作为参数，sipush接收16位整数，他们都将参数压入栈	</p>
 <ul>
 <li>所以bipush的范围是-128~127</li>
@@ -48,70 +107,109 @@
 <li>如果以上指令都不能满足需求，那么可以使用万能的ldc系列，它可以接收一个8位的参数，该参数指向常量池中的int、float或者String的索引，将指定的索引范围压入堆栈。</li>
 <li>类似的还有ldc_w,他接收两个8位参数，能支持的索引范围大于ldc</li>
 </ul>
-<pre><code class="hljs java"><span class="hljs-comment">//2.常量入栈指令</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">pushConstLdc</span><span class="hljs-params">()</span> &#123;
-        <span class="hljs-type">int</span> <span class="hljs-variable">i</span> <span class="hljs-operator">=</span> -<span class="hljs-number">1</span>;
-        <span class="hljs-type">int</span> <span class="hljs-variable">a</span> <span class="hljs-operator">=</span> <span class="hljs-number">5</span>;
-        <span class="hljs-type">int</span> <span class="hljs-variable">b</span> <span class="hljs-operator">=</span> <span class="hljs-number">6</span>;
-        <span class="hljs-type">int</span> <span class="hljs-variable">c</span> <span class="hljs-operator">=</span> <span class="hljs-number">127</span>;
-        <span class="hljs-type">int</span> <span class="hljs-variable">d</span> <span class="hljs-operator">=</span> <span class="hljs-number">128</span>;
-        <span class="hljs-type">int</span> <span class="hljs-variable">e</span> <span class="hljs-operator">=</span> <span class="hljs-number">32767</span>;
-        <span class="hljs-type">int</span> <span class="hljs-variable">f</span> <span class="hljs-operator">=</span> <span class="hljs-number">32768</span>;
-    &#125;</code></pre>
+<pre><code class=" hljs java"><span class="hljs-comment">//2.常量入栈指令</span>
+              <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span
+                class="hljs-title function_">pushConstLdc</span><span class="hljs-params">()</span> &#123;
+              <span class="hljs-type">int</span> <span class="hljs-variable">i</span> <span
+                class="hljs-operator">=</span> -<span class="hljs-number">1</span>;
+              <span class="hljs-type">int</span> <span class="hljs-variable">a</span> <span
+                class="hljs-operator">=</span> <span class="hljs-number">5</span>;
+              <span class="hljs-type">int</span> <span class="hljs-variable">b</span> <span
+                class="hljs-operator">=</span> <span class="hljs-number">6</span>;
+              <span class="hljs-type">int</span> <span class="hljs-variable">c</span> <span
+                class="hljs-operator">=</span> <span class="hljs-number">127</span>;
+              <span class="hljs-type">int</span> <span class="hljs-variable">d</span> <span
+                class="hljs-operator">=</span> <span class="hljs-number">128</span>;
+              <span class="hljs-type">int</span> <span class="hljs-variable">e</span> <span
+                class="hljs-operator">=</span> <span class="hljs-number">32767</span>;
+              <span class="hljs-type">int</span> <span class="hljs-variable">f</span> <span
+                class="hljs-operator">=</span> <span class="hljs-number">32768</span>;
+              &#125;</code></pre>
 
-<p>总结</p>
-<p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
-  class="img-loading" data-original="/%5Ctushi%5CSnipaste_2023-05-28_11-42-09.png""></p>
-<h4 id="出栈装入局部变量表指令"><a href="#出栈装入局部变量表指令" class="headerlink" title="出栈装入局部变量表指令"></a>出栈装入局部变量表指令</h4><p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
-  class="img-loading" data-original="/%5Ctushi%5CSnipaste_2023-05-28_12-52-40.png""></p>
-<h4 id="算数运算符"><a href="#算数运算符" class="headerlink" title="算数运算符"></a>算数运算符</h4><p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
-  class="img-loading" data-original="/%5Ctushi%5CSnipaste_2023-05-28_13-17-58.png""><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
-  class="img-loading" data-original="/%5Ctushi%5CSnipaste_2023-05-28_13-21-44.png""></p>
-<p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
-  class="img-loading" data-original="/%5Ctushi%5CSnipaste_2023-05-28_13-28-32.png""></p>
-<h5 id="运算符"><a href="#运算符" class="headerlink" title="++运算符"></a>++运算符</h5><p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
-  class="img-loading" data-original="/%5Ctushi%5CSnipaste_2023-05-28_14-47-32.png""></p>
-<h5 id="比较指令的说明"><a href="#比较指令的说明" class="headerlink" title="比较指令的说明"></a>比较指令的说明</h5><p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
-  class="img-loading" data-original="/%5Ctushi%5CSnipaste_2023-05-28_14-37-24.png""></p>
-<h2 id="类型转换指令"><a href="#类型转换指令" class="headerlink" title="类型转换指令"></a>类型转换指令</h2><ol>
-<li>类型转换指令可以将两种不同的数值类型进行相互转化</li>
-<li>这些住转化操作一般用于实现用户带码中的显示类型转化操作，或者用来处理字节码指令集中数据类型相关指令无法与数据类型一一对应的问题</li>
-</ol>
-<h4 id="宽化类型转化"><a href="#宽化类型转化" class="headerlink" title="宽化类型转化"></a>宽化类型转化</h4><p>小范围类型向大范围类型转化的安全转化</p>
-<ul>
-<li>int –&gt; long、float或者double类型 对应的指令为：i2l, i2f, i2d</li>
-<li>从long–&gt;float、double类型。对应的类型指令为：l2f, l2d</li>
-<li>float–&gt;double  对应的指令为: f2d</li>
-</ul>
-<p>简化为： int–&gt;long–&gt;float–&gt;double</p>
-<p><strong>精度损失问题</strong></p>
-<p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
-  class="img-loading" data-original="/%5Ctushi%5CSnipaste_2023-05-28_15-12-47.png""><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
-  class="img-loading" data-original="/%5Ctushi%5CSnipaste_2023-05-28_15-21-18.png""></p>
-<h4 id="窄化类型处理"><a href="#窄化类型处理" class="headerlink" title="窄化类型处理"></a>窄化类型处理</h4><p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
-  class="img-loading" data-original="/%5Ctushi%5CSnipaste_2023-05-28_15-37-53.png""><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
-  class="img-loading" data-original="/%5Ctushi%5CSnipaste_2023-05-28_16-11-25.png""></p>
-<h2 id="创建类和数组的实例的指令"><a href="#创建类和数组的实例的指令" class="headerlink" title="创建类和数组的实例的指令"></a>创建类和数组的实例的指令</h2><p>可进一步分为创建指令，字段访问指令、数组操作指令、类型检查指令</p>
-<h3 id="创建指令"><a href="#创建指令" class="headerlink" title="创建指令"></a>创建指令</h3><p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
-  class="img-loading" data-original="/%5Ctushi%5CSnipaste_2023-05-30_18-07-01.png""></p>
-<pre><code class="hljs java"><span class="hljs-comment">//1.创建指令</span>
-   <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">newInstance</span><span class="hljs-params">()</span> &#123;
-       <span class="hljs-type">Object</span> <span class="hljs-variable">obj</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Object</span>();
+            <p>总结</p>
+            <p><img
+                src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg=="
+                class="img-loading" data-original="\tushi\CSnipaste_2023-05-28_11-42-09.png""></p>
+<h4 id=" 出栈装入局部变量表指令"><a href="#出栈装入局部变量表指令" class="headerlink" title="出栈装入局部变量表指令"></a>出栈装入局部变量表指令</h4>
+            <p><img
+                src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg=="
+                class="img-loading" data-original="\tushi\CSnipaste_2023-05-28_12-52-40.png""></p>
+<h4 id=" 算数运算符"><a href="#算数运算符" class="headerlink" title="算数运算符"></a>算数运算符</h4>
+            <p><img
+                src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg=="
+                class="img-loading" data-original="\tushi\CSnipaste_2023-05-28_13-17-58.png""><img src="
+                data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
+  class=" img-loading" data-original="\tushi\CSnipaste_2023-05-28_13-21-44.png""></p>
+<p><img src=" data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
+  class=" img-loading" data-original="\tushi\CSnipaste_2023-05-28_13-28-32.png""></p>
+<h5 id=" 运算符"><a href="#运算符" class="headerlink" title="++运算符"></a>++运算符</h5>
+            <p><img
+                src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg=="
+                class="img-loading" data-original="\tushi\CSnipaste_2023-05-28_14-47-32.png""></p>
+<h5 id=" 比较指令的说明"><a href="#比较指令的说明" class="headerlink" title="比较指令的说明"></a>比较指令的说明</h5>
+            <p><img
+                src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg=="
+                class="img-loading" data-original="\tushi\CSnipaste_2023-05-28_14-37-24.png""></p>
+<h2 id=" 类型转换指令"><a href="#类型转换指令" class="headerlink" title="类型转换指令"></a>类型转换指令</h2>
+            <ol>
+              <li>类型转换指令可以将两种不同的数值类型进行相互转化</li>
+              <li>这些住转化操作一般用于实现用户带码中的显示类型转化操作，或者用来处理字节码指令集中数据类型相关指令无法与数据类型一一对应的问题</li>
+            </ol>
+            <h4 id="宽化类型转化"><a href="#宽化类型转化" class="headerlink" title="宽化类型转化"></a>宽化类型转化</h4>
+            <p>小范围类型向大范围类型转化的安全转化</p>
+            <ul>
+              <li>int –&gt; long、float或者double类型 对应的指令为：i2l, i2f, i2d</li>
+              <li>从long–&gt;float、double类型。对应的类型指令为：l2f, l2d</li>
+              <li>float–&gt;double 对应的指令为: f2d</li>
+            </ul>
+            <p>简化为： int–&gt;long–&gt;float–&gt;double</p>
+            <p><strong>精度损失问题</strong></p>
+            <p><img
+                src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg=="
+                class="img-loading" data-original="\tushi\CSnipaste_2023-05-28_15-12-47.png""><img src="
+                data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
+  class=" img-loading" data-original="\tushi\CSnipaste_2023-05-28_15-21-18.png""></p>
+<h4 id=" 窄化类型处理"><a href="#窄化类型处理" class="headerlink" title="窄化类型处理"></a>窄化类型处理</h4>
+            <p><img
+                src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg=="
+                class="img-loading" data-original="\tushi\CSnipaste_2023-05-28_15-37-53.png""><img src="
+                data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
+  class=" img-loading" data-original="\tushi\CSnipaste_2023-05-28_16-11-25.png""></p>
+<h2 id=" 创建类和数组的实例的指令"><a href="#创建类和数组的实例的指令" class="headerlink" title="创建类和数组的实例的指令"></a>创建类和数组的实例的指令</h2>
+            <p>可进一步分为创建指令，字段访问指令、数组操作指令、类型检查指令</p>
+            <h3 id="创建指令"><a href="#创建指令" class="headerlink" title="创建指令"></a>创建指令</h3>
+            <p><img
+                src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg=="
+                class="img-loading" data-original="\tushi\CSnipaste_2023-05-30_18-07-01.png""></p>
+<pre><code class=" hljs java"><span class="hljs-comment">//1.创建指令</span>
+              <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span
+                class="hljs-title function_">newInstance</span><span class="hljs-params">()</span> &#123;
+              <span class="hljs-type">Object</span> <span class="hljs-variable">obj</span> <span
+                class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span
+                class="hljs-title class_">Object</span>();
 
-       <span class="hljs-type">File</span> <span class="hljs-variable">file</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">File</span>(<span class="hljs-string">&quot;atguigu.avi&quot;</span>);
-   &#125;
+              <span class="hljs-type">File</span> <span class="hljs-variable">file</span> <span
+                class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span
+                class="hljs-title class_">File</span>(<span class="hljs-string">&quot;atguigu.avi&quot;</span>);
+              &#125;
 
-  <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">newArray</span><span class="hljs-params">()</span> &#123;
-       <span class="hljs-type">int</span>[] intArray = <span class="hljs-keyword">new</span> <span class="hljs-title class_">int</span>[<span class="hljs-number">10</span>];
-       Object[] objArray = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Object</span>[<span class="hljs-number">10</span>];
-       <span class="hljs-type">int</span>[][] mintArray = <span class="hljs-keyword">new</span> <span class="hljs-title class_">int</span>[<span class="hljs-number">10</span>][<span class="hljs-number">10</span>];
+              <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span
+                class="hljs-title function_">newArray</span><span class="hljs-params">()</span> &#123;
+              <span class="hljs-type">int</span>[] intArray = <span class="hljs-keyword">new</span> <span
+                class="hljs-title class_">int</span>[<span class="hljs-number">10</span>];
+              Object[] objArray = <span class="hljs-keyword">new</span> <span
+                class="hljs-title class_">Object</span>[<span class="hljs-number">10</span>];
+              <span class="hljs-type">int</span>[][] mintArray = <span class="hljs-keyword">new</span> <span
+                class="hljs-title class_">int</span>[<span class="hljs-number">10</span>][<span
+                class="hljs-number">10</span>];
 
-       String[][] strArray = <span class="hljs-keyword">new</span> <span class="hljs-title class_">String</span>[<span class="hljs-number">10</span>][];
-   &#125;</code></pre>
+              String[][] strArray = <span class="hljs-keyword">new</span> <span
+                class="hljs-title class_">String</span>[<span class="hljs-number">10</span>][];
+              &#125;</code></pre>
 
 
 
-<pre><code class="hljs java"> <span class="hljs-number">0</span> <span class="hljs-keyword">new</span> #<span class="hljs-number">2</span> &lt;java/lang/Object&gt;
+            <pre><code class="hljs java"> <span class="hljs-number">0</span> <span class="hljs-keyword">new</span> #<span class="hljs-number">2</span> &lt;java/lang/Object&gt;
  <span class="hljs-number">3</span> dup    <span class="hljs-comment">// 复制一个引用   在存储的时候调用一个引用，在调用的时候同样会消耗一个引用</span>
  <span class="hljs-number">4</span> invokespecial #<span class="hljs-number">1</span> &lt;java/lang/Object.&lt;init&gt; : ()V&gt;
  <span class="hljs-number">7</span> astore_1
@@ -143,11 +241,16 @@
 
 
 
-<h3 id="字段访问指令"><a href="#字段访问指令" class="headerlink" title="字段访问指令"></a>字段访问指令</h3><p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
-  class="img-loading" data-original="/%5Ctushi%5CSnipaste_2023-05-30_18-28-43.png""><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
-  class="img-loading" data-original="/%5Ctushi%5CSnipaste_2023-05-30_18-38-00.png""><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
-  class="img-loading" data-original="/%5Ctushi%5CSnipaste_2023-05-30_18-38-43.png""><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
-  class="img-loading" data-original="/%5Ctushi%5CSnipaste_2023-05-30_18-38-58.png""></p>
+            <h3 id="字段访问指令"><a href="#字段访问指令" class="headerlink" title="字段访问指令"></a>字段访问指令</h3>
+            <p><img
+                src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg=="
+                class="img-loading" data-original="\tushi\CSnipaste_2023-05-30_18-28-43.png""><img src="
+                data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
+  class=" img-loading" data-original="\tushi\CSnipaste_2023-05-30_18-38-00.png""><img src="
+                data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
+  class=" img-loading" data-original="\tushi\CSnipaste_2023-05-30_18-38-43.png""><img src="
+                data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
+  class=" img-loading" data-original="\tushi\CSnipaste_2023-05-30_18-38-58.png""></p>
 <blockquote>
 <p>getstatic和putstatic指令的主要区别在于getstatic用于获取静态字段的值，而putstatic用于设置静态字段的值。</p>
 <p>getstatic指令的作用是将一个静态字段的值读取到操作数栈中，而putstatic指令的作用则是将一个操作数栈中的值写入到一个静态字段中去。  </p>
@@ -156,16 +259,19 @@
 </blockquote>
 <p>不同之处在于getstatic从静态字段中获取值并放入操作数栈顶，而putstatic从操作数栈顶取值并放入静态字段中。从这个角度来看，两者的操作方向是互相对称的。</p>
 </blockquote>
-<pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">setOrderId</span><span class="hljs-params">()</span>&#123;
-      <span class="hljs-type">Order</span> <span class="hljs-variable">order</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Order</span>();
-      order.id = <span class="hljs-number">1001</span>;
-      System.out.println(order.id);
+<pre><code class=" hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span
+                class="hljs-title function_">setOrderId</span><span class="hljs-params">()</span>&#123;
+              <span class="hljs-type">Order</span> <span class="hljs-variable">order</span> <span
+                class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span
+                class="hljs-title class_">Order</span>();
+              order.id = <span class="hljs-number">1001</span>;
+              System.out.println(order.id);
 
-      Order.name = <span class="hljs-string">&quot;ORDER&quot;</span>;
-      System.out.println(Order.name);
-  &#125;</code></pre>
+              Order.name = <span class="hljs-string">&quot;ORDER&quot;</span>;
+              System.out.println(Order.name);
+              &#125;</code></pre>
 
-<pre><code class="hljs java"> <span class="hljs-number">0</span> <span class="hljs-keyword">new</span> #<span class="hljs-number">11</span> &lt;com/jvm/中篇/chapter02/src/com/atguigu/java/Order&gt;
+            <pre><code class="hljs java"> <span class="hljs-number">0</span> <span class="hljs-keyword">new</span> #<span class="hljs-number">11</span> &lt;com/jvm/中篇/chapter02/src/com/atguigu/java/Order&gt;
  <span class="hljs-number">3</span> dup
  <span class="hljs-number">4</span> invokespecial #<span class="hljs-number">12</span> &lt;com/jvm/中篇/chapter02/src/com/atguigu/java/Order.&lt;init&gt; : ()V&gt;
  <span class="hljs-number">7</span> astore_1
@@ -186,24 +292,29 @@
 
 
 
-<h3 id="数组操作指令"><a href="#数组操作指令" class="headerlink" title="数组操作指令"></a>数组操作指令</h3><p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
-  class="img-loading" data-original="/%5Ctushi%5CSnipaste_2023-05-30_18-58-59.png""></p>
+            <h3 id="数组操作指令"><a href="#数组操作指令" class="headerlink" title="数组操作指令"></a>数组操作指令</h3>
+            <p><img
+                src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg=="
+                class="img-loading" data-original="\tushi\CSnipaste_2023-05-30_18-58-59.png""></p>
 <blockquote>
 <p>注：这里store修改的就不是局部变量表了 而是将结果存储到堆空间中</p>
 </blockquote>
-<p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
-  class="img-loading" data-original="/%5Ctushi%5CSnipaste_2023-05-30_19-11-05.png""></p>
-<pre><code class="hljs java"><span class="hljs-comment">//3.数组操作指令</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">setArray</span><span class="hljs-params">()</span> &#123;
-        <span class="hljs-type">int</span>[] intArray = <span class="hljs-keyword">new</span> <span class="hljs-title class_">int</span>[<span class="hljs-number">10</span>];
-        intArray[<span class="hljs-number">3</span>] = <span class="hljs-number">20</span>;
-        System.out.println(intArray[<span class="hljs-number">1</span>]);
+<p><img src=" data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
+  class=" img-loading" data-original="\tushi\CSnipaste_2023-05-30_19-11-05.png""></p>
+<pre><code class=" hljs java"><span class="hljs-comment">//3.数组操作指令</span>
+              <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span
+                class="hljs-title function_">setArray</span><span class="hljs-params">()</span> &#123;
+              <span class="hljs-type">int</span>[] intArray = <span class="hljs-keyword">new</span> <span
+                class="hljs-title class_">int</span>[<span class="hljs-number">10</span>];
+              intArray[<span class="hljs-number">3</span>] = <span class="hljs-number">20</span>;
+              System.out.println(intArray[<span class="hljs-number">1</span>]);
 
-        <span class="hljs-type">boolean</span>[] arr = <span class="hljs-keyword">new</span> <span class="hljs-title class_">boolean</span>[<span class="hljs-number">10</span>];
-        arr[<span class="hljs-number">1</span>] = <span class="hljs-literal">true</span>;
-    &#125;</code></pre>
+              <span class="hljs-type">boolean</span>[] arr = <span class="hljs-keyword">new</span> <span
+                class="hljs-title class_">boolean</span>[<span class="hljs-number">10</span>];
+              arr[<span class="hljs-number">1</span>] = <span class="hljs-literal">true</span>;
+              &#125;</code></pre>
 
-<pre><code class="hljs java"> <span class="hljs-number">0</span> bipush <span class="hljs-number">10</span>
+            <pre><code class="hljs java"> <span class="hljs-number">0</span> bipush <span class="hljs-number">10</span>
  <span class="hljs-number">2</span> newarray <span class="hljs-number">10</span> (<span class="hljs-type">int</span>)
  <span class="hljs-number">4</span> astore_1
  <span class="hljs-number">5</span> aload_1       <span class="hljs-comment">// 数组引用 </span>
@@ -224,19 +335,23 @@
 <span class="hljs-number">27</span> bastore
 <span class="hljs-number">28</span> <span class="hljs-keyword">return</span></code></pre>
 
-<p>​	</p>
-<h3 id="类型检查指令"><a href="#类型检查指令" class="headerlink" title="类型检查指令"></a>类型检查指令</h3><p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
-  class="img-loading" data-original="/%5Ctushi%5CSnipaste_2023-05-30_19-51-13.png""></p>
-<pre><code class="hljs java"><span class="hljs-comment">//4.类型检查指令</span>
-    <span class="hljs-keyword">public</span> String <span class="hljs-title function_">checkCast</span><span class="hljs-params">(Object obj)</span> &#123;
-        <span class="hljs-keyword">if</span> (obj <span class="hljs-keyword">instanceof</span> String) &#123; <span class="hljs-comment">// 判断obj是否是 String的一个实例</span>
-            <span class="hljs-keyword">return</span> (String) obj;
-        &#125; <span class="hljs-keyword">else</span> &#123;
-            <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
-        &#125;
-    &#125;</code></pre>
+            <p>​ </p>
+            <h3 id="类型检查指令"><a href="#类型检查指令" class="headerlink" title="类型检查指令"></a>类型检查指令</h3>
+            <p><img
+                src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg=="
+                class="img-loading" data-original="\tushi\CSnipaste_2023-05-30_19-51-13.png""></p>
+<pre><code class=" hljs java"><span class="hljs-comment">//4.类型检查指令</span>
+              <span class="hljs-keyword">public</span> String <span class="hljs-title function_">checkCast</span><span
+                class="hljs-params">(Object obj)</span> &#123;
+              <span class="hljs-keyword">if</span> (obj <span class="hljs-keyword">instanceof</span> String) &#123;
+              <span class="hljs-comment">// 判断obj是否是 String的一个实例</span>
+              <span class="hljs-keyword">return</span> (String) obj;
+              &#125; <span class="hljs-keyword">else</span> &#123;
+              <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
+              &#125;
+              &#125;</code></pre>
 
-<pre><code class="hljs java"> <span class="hljs-number">0</span> aload_1
+            <pre><code class="hljs java"> <span class="hljs-number">0</span> aload_1
  <span class="hljs-number">1</span> <span class="hljs-keyword">instanceof</span> #<span class="hljs-number">17</span> &lt;java/lang/String&gt;
  <span class="hljs-number">4</span> ifeq <span class="hljs-number">12</span> (+<span class="hljs-number">8</span>)
  <span class="hljs-number">7</span> aload_1
@@ -245,31 +360,42 @@
 <span class="hljs-number">12</span> aconst_null
 <span class="hljs-number">13</span> areturn</code></pre>
 
-<h2 id="方法调用与返回指令"><a href="#方法调用与返回指令" class="headerlink" title="方法调用与返回指令"></a>方法调用与返回指令</h2><h3 id="方法调用指令"><a href="#方法调用指令" class="headerlink" title="方法调用指令"></a>方法调用指令</h3><p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
-  class="img-loading" data-original="/%5Ctushi%5CSnipaste_2023-05-30_19-59-04.png""></p>
+            <h2 id="方法调用与返回指令"><a href="#方法调用与返回指令" class="headerlink" title="方法调用与返回指令"></a>方法调用与返回指令</h2>
+            <h3 id="方法调用指令"><a href="#方法调用指令" class="headerlink" title="方法调用指令"></a>方法调用指令</h3>
+            <p><img
+                src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg=="
+                class="img-loading" data-original="\tushi\CSnipaste_2023-05-30_19-59-04.png""></p>
 <blockquote>
 <p>静态类型绑定的方法不存在方法的重写</p>
 <blockquote>
 <p>**invokespecial  invokestatic **调用的方法中不存在方法的重写</p>
 </blockquote>
 </blockquote>
-<pre><code class="hljs java">eg: MethodInvokeReturnTest 以及 InterfaceMethodTest</code></pre>
+<pre><code class=" hljs java">eg: MethodInvokeReturnTest 以及 InterfaceMethodTest</code></pre>
 
-<h3 id="方法返回指令"><a href="#方法返回指令" class="headerlink" title="方法返回指令"></a>方法返回指令</h3><p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
-  class="img-loading" data-original="/%5Ctushi%5CSnipaste_2023-05-30_20-15-59.png""><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
-  class="img-loading" data-original="/%5Ctushi%5CSnipaste_2023-05-30_20-18-02.png""></p>
-<h2 id="操作数栈管理指令"><a href="#操作数栈管理指令" class="headerlink" title="操作数栈管理指令"></a>操作数栈管理指令</h2><p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
-  class="img-loading" data-original="/%5Ctushi%5CSnipaste_2023-05-30_20-25-27.png""><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
-  class="img-loading" data-original="/%5Ctushi%5CSnipaste_2023-05-30_20-26-00.png""></p>
+            <h3 id="方法返回指令"><a href="#方法返回指令" class="headerlink" title="方法返回指令"></a>方法返回指令</h3>
+            <p><img
+                src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg=="
+                class="img-loading" data-original="\tushi\CSnipaste_2023-05-30_20-15-59.png""><img src="
+                data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
+  class=" img-loading" data-original="\tushi\CSnipaste_2023-05-30_20-18-02.png""></p>
+<h2 id=" 操作数栈管理指令"><a href="#操作数栈管理指令" class="headerlink" title="操作数栈管理指令"></a>操作数栈管理指令</h2>
+            <p><img
+                src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg=="
+                class="img-loading" data-original="\tushi\CSnipaste_2023-05-30_20-25-27.png""><img src="
+                data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
+  class=" img-loading" data-original="\tushi\CSnipaste_2023-05-30_20-26-00.png""></p>
 <p>没有 变量调用（或者说 在整个方法周期中没有对该数据进行调用） 会将操作数栈中的数据pop出去</p>
-<pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">foo</span><span class="hljs-params">()</span>&#123;
-    bar();
-&#125;
-<span class="hljs-keyword">public</span> <span class="hljs-type">long</span> <span class="hljs-title function_">bar</span><span class="hljs-params">()</span>&#123;
-    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
-&#125;</code></pre>
+<pre><code class=" hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span
+                class="hljs-title function_">foo</span><span class="hljs-params">()</span>&#123;
+              bar();
+              &#125;
+              <span class="hljs-keyword">public</span> <span class="hljs-type">long</span> <span
+                class="hljs-title function_">bar</span><span class="hljs-params">()</span>&#123;
+              <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+              &#125;</code></pre>
 
-<pre><code class="hljs java"><span class="hljs-number">0</span> aload_0
+            <pre><code class="hljs java"><span class="hljs-number">0</span> aload_0
 <span class="hljs-number">1</span> invokevirtual #<span class="hljs-number">5</span> &lt;com/jvm/中篇/chapter02/src/com/atguigu/java/StackOperateTest.bar : ()J&gt;
 <span class="hljs-number">4</span> pop2
 <span class="hljs-number">5</span> <span class="hljs-keyword">return</span>
@@ -279,33 +405,41 @@
 
 
 
-<h2 id="控制转移指令"><a href="#控制转移指令" class="headerlink" title="控制转移指令"></a>控制转移指令</h2><p>大体上分为：</p>
-<ul>
-<li>比较指令</li>
-<li>条件跳转指令</li>
-<li>比较条件跳转指令</li>
-<li>多条件分支跳转指令</li>
-<li>无条件跳转指令</li>
-</ul>
-<h3 id="比较指令"><a href="#比较指令" class="headerlink" title="比较指令"></a>比较指令</h3><p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
-  class="img-loading" data-original="/%5Ctushi%5CSnipaste_2023-05-28_14-37-24.png""></p>
+            <h2 id="控制转移指令"><a href="#控制转移指令" class="headerlink" title="控制转移指令"></a>控制转移指令</h2>
+            <p>大体上分为：</p>
+            <ul>
+              <li>比较指令</li>
+              <li>条件跳转指令</li>
+              <li>比较条件跳转指令</li>
+              <li>多条件分支跳转指令</li>
+              <li>无条件跳转指令</li>
+            </ul>
+            <h3 id="比较指令"><a href="#比较指令" class="headerlink" title="比较指令"></a>比较指令</h3>
+            <p><img
+                src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg=="
+                class="img-loading" data-original="\tushi\CSnipaste_2023-05-28_14-37-24.png""></p>
 <p>数值类型的数据才可以比较大小  double long float</p>
 <p>boolean、引用数据类型不可以比较大小</p>
 <p>​	</p>
-<h3 id="条件跳转指令"><a href="#条件跳转指令" class="headerlink" title="条件跳转指令"></a>条件跳转指令</h3><p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
-  class="img-loading" data-original="/%5Ctushi%5CSnipaste_2023-06-01_08-24-49.png""><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
-  class="img-loading" data-original="/%5Ctushi%5CSnipaste_2023-06-01_08-26-38.png""></p>
-<pre><code class="hljs java"><span class="hljs-comment">//1.条件跳转指令</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">compare1</span><span class="hljs-params">()</span>&#123;
-        <span class="hljs-type">int</span> <span class="hljs-variable">a</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>;
-        <span class="hljs-keyword">if</span>(a != <span class="hljs-number">0</span>)&#123;
-            a = <span class="hljs-number">10</span>;
-        &#125;<span class="hljs-keyword">else</span>&#123;
-            a = <span class="hljs-number">20</span>;
-        &#125;
-    &#125;</code></pre>
+<h3 id=" 条件跳转指令"><a href="#条件跳转指令" class="headerlink" title="条件跳转指令"></a>条件跳转指令</h3>
+            <p><img
+                src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg=="
+                class="img-loading" data-original="\tushi\CSnipaste_2023-06-01_08-24-49.png""><img src="
+                data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
+  class=" img-loading" data-original="\tushi\CSnipaste_2023-06-01_08-26-38.png""></p>
+<pre><code class=" hljs java"><span class="hljs-comment">//1.条件跳转指令</span>
+              <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span
+                class="hljs-title function_">compare1</span><span class="hljs-params">()</span>&#123;
+              <span class="hljs-type">int</span> <span class="hljs-variable">a</span> <span
+                class="hljs-operator">=</span> <span class="hljs-number">0</span>;
+              <span class="hljs-keyword">if</span>(a != <span class="hljs-number">0</span>)&#123;
+              a = <span class="hljs-number">10</span>;
+              &#125;<span class="hljs-keyword">else</span>&#123;
+              a = <span class="hljs-number">20</span>;
+              &#125;
+              &#125;</code></pre>
 
-<pre><code class="hljs java"> <span class="hljs-number">0</span> iconst_0
+            <pre><code class="hljs java"> <span class="hljs-number">0</span> iconst_0
  <span class="hljs-number">1</span> istore_1
  <span class="hljs-number">2</span> iload_1
  <span class="hljs-number">3</span> ifeq <span class="hljs-number">12</span> (+<span class="hljs-number">9</span>)
@@ -318,13 +452,13 @@
 
 
 
-<pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">compare3</span><span class="hljs-params">()</span> &#123;
+            <pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">compare3</span><span class="hljs-params">()</span> &#123;
        <span class="hljs-type">int</span> <span class="hljs-variable">i1</span> <span class="hljs-operator">=</span> <span class="hljs-number">10</span>;
        <span class="hljs-type">long</span> <span class="hljs-variable">l1</span> <span class="hljs-operator">=</span> <span class="hljs-number">20</span>;
        System.out.println(i1 &gt; l1);
    &#125;</code></pre>
 
-<pre><code class="hljs java"> <span class="hljs-number">0</span> bipush <span class="hljs-number">10</span>
+            <pre><code class="hljs java"> <span class="hljs-number">0</span> bipush <span class="hljs-number">10</span>
  <span class="hljs-number">2</span> istore_1
  <span class="hljs-number">3</span> ldc2_w #<span class="hljs-number">6</span> &lt;<span class="hljs-number">20</span>&gt;
  <span class="hljs-number">6</span> lstore_2
@@ -343,18 +477,23 @@
     
     注：在sysyem.out.print的时候传给的数字，按理说输出的应该也是数字 但是实际输出的是<span class="hljs-type">boolean</span> 查看字节码后发现 &lt;println : (Z)V&gt;，sysyem.out.print使用的<span class="hljs-type">boolean</span>类型的，所以输出的也是<span class="hljs-type">boolean</span>类型</code></pre>
 
-<p>只有float double long才会进行比较指令和条件跳转指令相结合</p>
-<p>如果本身是byte boolean char int 直接使用条件跳转指令(单个)</p>
-<h3 id="比较条件跳转指令"><a href="#比较条件跳转指令" class="headerlink" title="比较条件跳转指令"></a>比较条件跳转指令</h3><p>如果是两个int或者引用类型进行比较 则需要使用条件跳转指令</p>
-<p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
-  class="img-loading" data-original="/%5Ctushi%5CSnipaste_2023-06-01_09-01-12.png""></p>
-<pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">ifCompare2</span><span class="hljs-params">()</span> &#123;
-       <span class="hljs-type">short</span> <span class="hljs-variable">s1</span> <span class="hljs-operator">=</span> <span class="hljs-number">9</span>;
-       <span class="hljs-type">byte</span> <span class="hljs-variable">b1</span> <span class="hljs-operator">=</span> <span class="hljs-number">10</span>;
-       System.out.println(s1 &gt; b1);
-   &#125;</code></pre>
+            <p>只有float double long才会进行比较指令和条件跳转指令相结合</p>
+            <p>如果本身是byte boolean char int 直接使用条件跳转指令(单个)</p>
+            <h3 id="比较条件跳转指令"><a href="#比较条件跳转指令" class="headerlink" title="比较条件跳转指令"></a>比较条件跳转指令</h3>
+            <p>如果是两个int或者引用类型进行比较 则需要使用条件跳转指令</p>
+            <p><img
+                src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg=="
+                class="img-loading" data-original="\tushi\CSnipaste_2023-06-01_09-01-12.png""></p>
+<pre><code class=" hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span
+                class="hljs-title function_">ifCompare2</span><span class="hljs-params">()</span> &#123;
+              <span class="hljs-type">short</span> <span class="hljs-variable">s1</span> <span
+                class="hljs-operator">=</span> <span class="hljs-number">9</span>;
+              <span class="hljs-type">byte</span> <span class="hljs-variable">b1</span> <span
+                class="hljs-operator">=</span> <span class="hljs-number">10</span>;
+              System.out.println(s1 &gt; b1);
+              &#125;</code></pre>
 
-<pre><code class="hljs java"> <span class="hljs-number">0</span> bipush <span class="hljs-number">9</span>
+            <pre><code class="hljs java"> <span class="hljs-number">0</span> bipush <span class="hljs-number">9</span>
  <span class="hljs-number">2</span> istore_1
  <span class="hljs-number">3</span> bipush <span class="hljs-number">10</span>
  <span class="hljs-number">5</span> istore_2
@@ -371,23 +510,30 @@
 
 
 
-<h3 id="多条件分支跳转指令"><a href="#多条件分支跳转指令" class="headerlink" title="多条件分支跳转指令"></a>多条件分支跳转指令</h3><p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
-  class="img-loading" data-original="/%5Ctushi%5CSnipaste_2023-06-01_09-22-51.png""></p>
-<p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
-  class="img-loading" data-original="/%5Ctushi%5CSnipaste_2023-06-01_09-23-08.png""></p>
-<p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
-  class="img-loading" data-original="/%5Ctushi%5CSnipaste_2023-06-01_09-23-33.png""></p>
-<pre><code class="hljs java"><span class="hljs-comment">//jdk7新特性：引入String类型</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">swtich3</span><span class="hljs-params">(String season)</span>&#123;
-        <span class="hljs-keyword">switch</span>(season)&#123;
-            <span class="hljs-keyword">case</span> <span class="hljs-string">&quot;SPRING&quot;</span>:<span class="hljs-keyword">break</span>;
-            <span class="hljs-keyword">case</span> <span class="hljs-string">&quot;SUMMER&quot;</span>:<span class="hljs-keyword">break</span>;
-            <span class="hljs-keyword">case</span> <span class="hljs-string">&quot;AUTUMN&quot;</span>:<span class="hljs-keyword">break</span>;
-            <span class="hljs-keyword">case</span> <span class="hljs-string">&quot;WINTER&quot;</span>:<span class="hljs-keyword">break</span>;
-        &#125;
-    &#125;</code></pre>
+            <h3 id="多条件分支跳转指令"><a href="#多条件分支跳转指令" class="headerlink" title="多条件分支跳转指令"></a>多条件分支跳转指令</h3>
+            <p><img
+                src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg=="
+                class="img-loading" data-original="\tushi\CSnipaste_2023-06-01_09-22-51.png""></p>
+<p><img src=" data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
+  class=" img-loading" data-original="\tushi\CSnipaste_2023-06-01_09-23-08.png""></p>
+<p><img src=" data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
+  class=" img-loading" data-original="\tushi\CSnipaste_2023-06-01_09-23-33.png""></p>
+<pre><code class=" hljs java"><span class="hljs-comment">//jdk7新特性：引入String类型</span>
+              <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span
+                class="hljs-title function_">swtich3</span><span class="hljs-params">(String season)</span>&#123;
+              <span class="hljs-keyword">switch</span>(season)&#123;
+              <span class="hljs-keyword">case</span> <span class="hljs-string">&quot;SPRING&quot;</span>:<span
+                class="hljs-keyword">break</span>;
+              <span class="hljs-keyword">case</span> <span class="hljs-string">&quot;SUMMER&quot;</span>:<span
+                class="hljs-keyword">break</span>;
+              <span class="hljs-keyword">case</span> <span class="hljs-string">&quot;AUTUMN&quot;</span>:<span
+                class="hljs-keyword">break</span>;
+              <span class="hljs-keyword">case</span> <span class="hljs-string">&quot;WINTER&quot;</span>:<span
+                class="hljs-keyword">break</span>;
+              &#125;
+              &#125;</code></pre>
 
-<pre><code class="hljs java">  <span class="hljs-number">0</span> aload_1
+            <pre><code class="hljs java">  <span class="hljs-number">0</span> aload_1
   <span class="hljs-number">1</span> astore_2
   <span class="hljs-number">2</span> iconst_m1
   <span class="hljs-number">3</span> istore_3
@@ -440,19 +586,24 @@
 
 
 
-<h3 id="无条件跳转指令"><a href="#无条件跳转指令" class="headerlink" title="无条件跳转指令"></a>无条件跳转指令</h3><p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
-  class="img-loading" data-original="/%5Ctushi%5CSnipaste_2023-06-01_09-38-17.png""></p>
-<pre><code class="hljs java"><span class="hljs-comment">//4.无条件跳转指令</span>
-    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">whileInt</span><span class="hljs-params">()</span> &#123;
-        <span class="hljs-type">int</span> <span class="hljs-variable">i</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>;
-        <span class="hljs-keyword">while</span> (i &lt; <span class="hljs-number">100</span>) &#123;
-            <span class="hljs-type">String</span> <span class="hljs-variable">s</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;atguigu.com&quot;</span>;
-            i++;
-        &#125;
-    &#125;
-</code></pre>
+            <h3 id="无条件跳转指令"><a href="#无条件跳转指令" class="headerlink" title="无条件跳转指令"></a>无条件跳转指令</h3>
+            <p><img
+                src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg=="
+                class="img-loading" data-original="\tushi\CSnipaste_2023-06-01_09-38-17.png""></p>
+<pre><code class=" hljs java"><span class="hljs-comment">//4.无条件跳转指令</span>
+              <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span
+                class="hljs-title function_">whileInt</span><span class="hljs-params">()</span> &#123;
+              <span class="hljs-type">int</span> <span class="hljs-variable">i</span> <span
+                class="hljs-operator">=</span> <span class="hljs-number">0</span>;
+              <span class="hljs-keyword">while</span> (i &lt; <span class="hljs-number">100</span>) &#123;
+              <span class="hljs-type">String</span> <span class="hljs-variable">s</span> <span
+                class="hljs-operator">=</span> <span class="hljs-string">&quot;atguigu.com&quot;</span>;
+              i++;
+              &#125;
+              &#125;
+              </code></pre>
 
-<pre><code class="hljs java"> <span class="hljs-number">0</span> iconst_0
+            <pre><code class="hljs java"> <span class="hljs-number">0</span> iconst_0
  <span class="hljs-number">1</span> istore_1
  <span class="hljs-number">2</span> iload_1
  <span class="hljs-number">3</span> bipush <span class="hljs-number">100</span>
@@ -465,31 +616,73 @@
 
 
 
-<p>从字节码角度讲 for 和 while 没有任何区别 但从语法角度讲 while 和 for中i的作用域范围不同</p>
-<h3 id="异常处理指令"><a href="#异常处理指令" class="headerlink" title="异常处理指令"></a>异常处理指令</h3><h4 id="抛出异常指令"><a href="#抛出异常指令" class="headerlink" title="抛出异常指令"></a>抛出异常指令</h4><p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
-  class="img-loading" data-original="/%5Ctushi%5CSnipaste_2023-06-01_09-55-37.png""></p>
-<h4 id="异常处理与异常表"><a href="#异常处理与异常表" class="headerlink" title="异常处理与异常表"></a>异常处理与异常表</h4><p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
-  class="img-loading" data-original="/%5Ctushi%5CSnipaste_2023-06-01_10-03-46.png""></p>
-<p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
-  class="img-loading" data-original="/%5Ctushi%5CSnipaste_2023-06-01_10-25-04.png""></p>
-<pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">tryCatch</span><span class="hljs-params">()</span>&#123;
-    <span class="hljs-keyword">try</span>&#123;
-        <span class="hljs-type">File</span> <span class="hljs-variable">file</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">File</span>(<span class="hljs-string">&quot;d:/hello.txt&quot;</span>);
-        <span class="hljs-type">FileInputStream</span> <span class="hljs-variable">fis</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">FileInputStream</span>(file);
+            <p>从字节码角度讲 for 和 while 没有任何区别 但从语法角度讲 while 和 for中i的作用域范围不同</p>
+            <h3 id="异常处理指令"><a href="#异常处理指令" class="headerlink" title="异常处理指令"></a>异常处理指令</h3>
+            <h4 id="抛出异常指令"><a href="#抛出异常指令" class="headerlink" title="抛出异常指令"></a>抛出异常指令</h4>
+            <p><img
+                src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg=="
+                class="img-loading" data-original="\tushi\CSnipaste_2023-06-01_09-55-37.png""></p>
+<h4 id=" 异常处理与异常表"><a href="#异常处理与异常表" class="headerlink" title="异常处理与异常表"></a>异常处理与异常表</h4>
+            <p><img
+                src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg=="
+                class="img-loading" data-original="\tushi\CSnipaste_2023-06-01_10-03-46.png""></p>
+<p><img src=" data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
+  class=" img-loading" data-original="\tushi\CSnipaste_2023-06-01_10-25-04.png""></p>
+<pre><code class=" hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span
+                class="hljs-title function_">tryCatch</span><span class="hljs-params">()</span>&#123;
+              <span class="hljs-keyword">try</span>&#123;
+              <span class="hljs-type">File</span> <span class="hljs-variable">file</span> <span
+                class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span
+                class="hljs-title class_">File</span>(<span class="hljs-string">&quot;d:/hello.txt&quot;</span>);
+              <span class="hljs-type">FileInputStream</span> <span class="hljs-variable">fis</span> <span
+                class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span
+                class="hljs-title class_">FileInputStream</span>(file);
 
-        <span class="hljs-type">String</span> <span class="hljs-variable">info</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;hello!&quot;</span>;
-    &#125;<span class="hljs-keyword">catch</span> (FileNotFoundException e) &#123;
-        e.printStackTrace();
-    &#125;
-    <span class="hljs-keyword">catch</span>(RuntimeException e)&#123;
-        e.printStackTrace();
-    &#125;
-&#125;</code></pre>
+              <span class="hljs-type">String</span> <span class="hljs-variable">info</span> <span
+                class="hljs-operator">=</span> <span class="hljs-string">&quot;hello!&quot;</span>;
+              &#125;<span class="hljs-keyword">catch</span> (FileNotFoundException e) &#123;
+              e.printStackTrace();
+              &#125;
+              <span class="hljs-keyword">catch</span>(RuntimeException e)&#123;
+              e.printStackTrace();
+              &#125;
+              &#125;</code></pre>
 
 
 
-<h3 id="同步控制指令"><a href="#同步控制指令" class="headerlink" title="同步控制指令"></a>同步控制指令</h3><h4 id="方法级同步"><a href="#方法级同步" class="headerlink" title="方法级同步"></a>方法级同步</h4><p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
-  class="img-loading" data-original="/%5Ctushi%5CSnipaste_2023-06-01_10-28-21.png""></p>
-<p><img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
-  class="img-loading" data-original="/%5Ctushi%5CSnipaste_2023-06-01_10-50-49.png""></p>
-</div></article><div class="copyright-wrapper"><p>原文作者:<a href="http://example.com">hcj</a></p><p>原文链接:<a href="http://example.com/2023/10/12/%E5%AD%97%E8%8A%82%E7%A0%81%E6%8C%87%E4%BB%A4%E9%9B%86/">字节码指令集</a></p><p>发表日期: 2023-10-12 20:16:15</p><p>更新日期: 2024-03-30 14:40:44</p><p>版权声明: 本文采用<a rel="license noopener" target="_blank" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p></div><div class="post-pager"><div class="prev"><a href="/2024/03/12/03-%E7%B1%BB%E7%9A%84%E5%8A%A0%E8%BD%BD%E8%BF%87%E7%A8%8B%E8%AF%A6%E8%A7%A3-%E7%B1%BB%E7%9A%84%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F/" title="类的加载过程详解(类的生命周期)">上一篇 类的加载过程详解(类的生命周期)</a></div><div class="next"> <a href="/2023/09/13/slot%E6%A7%BD%E4%BD%8D%E6%98%A0%E5%B0%84%E6%96%B9%E6%A1%88/" title="slot槽位映射方案">下一篇 slot槽位映射方案</a></div></div></section></section></main><footer class="footer-page"><div><span>Powered by</span><a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a><span>| Theme</span><a target="_blank" rel="noopener" href="https://github.com/techmovie/hexo-theme-instapaper">instapaper</a></div></footer><script src="/scripts/dark.js"></script><script src="/scripts/post.js"></script></body></html>
+            <h3 id="同步控制指令"><a href="#同步控制指令" class="headerlink" title="同步控制指令"></a>同步控制指令</h3>
+            <h4 id="方法级同步"><a href="#方法级同步" class="headerlink" title="方法级同步"></a>方法级同步</h4>
+            <p><img
+                src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg=="
+                class="img-loading" data-original="\tushi\CSnipaste_2023-06-01_10-28-21.png""></p>
+<p><img src=" data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" 
+  class=" img-loading" data-original="\tushi\CSnipaste_2023-06-01_10-50-49.png""></p>
+</div></article><div class=" copyright-wrapper">
+            <p>原文作者:<a href="http://example.com">hcj</a></p>
+            <p>原文链接:<a
+                href="http://example.com/2023/10/12/%E5%AD%97%E8%8A%82%E7%A0%81%E6%8C%87%E4%BB%A4%E9%9B%86/">字节码指令集</a>
+            </p>
+            <p>发表日期: 2023-10-12 20:16:15</p>
+            <p>更新日期: 2024-03-30 14:40:44</p>
+            <p>版权声明: 本文采用<a rel="license noopener" target="_blank"
+                href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+          </div>
+          <div class="post-pager">
+            <div class="prev"><a
+                href="/2024/03/12/03-%E7%B1%BB%E7%9A%84%E5%8A%A0%E8%BD%BD%E8%BF%87%E7%A8%8B%E8%AF%A6%E8%A7%A3-%E7%B1%BB%E7%9A%84%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F/"
+                title="类的加载过程详解(类的生命周期)">上一篇 类的加载过程详解(类的生命周期)</a></div>
+            <div class="next"> <a href="/2023/09/13/slot%E6%A7%BD%E4%BD%8D%E6%98%A0%E5%B0%84%E6%96%B9%E6%A1%88/"
+                title="slot槽位映射方案">下一篇 slot槽位映射方案</a></div>
+          </div>
+      </section>
+    </section>
+  </main>
+  <footer class="footer-page">
+    <div><span>Powered by</span><a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a><span>| Theme</span><a
+        target="_blank" rel="noopener" href="https://github.com/techmovie/hexo-theme-instapaper">instapaper</a></div>
+  </footer>
+  <script src="/scripts/dark.js"></script>
+  <script src="/scripts/post.js"></script>
+</body>
+
+</html>
